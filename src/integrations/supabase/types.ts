@@ -14,16 +14,425 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          id: string
+          note: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      briefings: {
+        Row: {
+          address: string | null
+          audience: string | null
+          city: string | null
+          company_name: string
+          created_at: string
+          cta: string | null
+          differentials: string | null
+          email: string | null
+          goal: string | null
+          hours: string | null
+          id: string
+          instagram: string | null
+          niche: string | null
+          notes: string | null
+          pages: string | null
+          phone: string | null
+          primary_color: string | null
+          promotions: string | null
+          secondary_color: string | null
+          services: string | null
+          state: string | null
+          style: string | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          audience?: string | null
+          city?: string | null
+          company_name: string
+          created_at?: string
+          cta?: string | null
+          differentials?: string | null
+          email?: string | null
+          goal?: string | null
+          hours?: string | null
+          id?: string
+          instagram?: string | null
+          niche?: string | null
+          notes?: string | null
+          pages?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          promotions?: string | null
+          secondary_color?: string | null
+          services?: string | null
+          state?: string | null
+          style?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          audience?: string | null
+          city?: string | null
+          company_name?: string
+          created_at?: string
+          cta?: string | null
+          differentials?: string | null
+          email?: string | null
+          goal?: string | null
+          hours?: string | null
+          id?: string
+          instagram?: string | null
+          niche?: string | null
+          notes?: string | null
+          pages?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          promotions?: string | null
+          secondary_color?: string | null
+          services?: string | null
+          state?: string | null
+          style?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          city: string | null
+          close_date: string | null
+          created_at: string
+          domain: string | null
+          id: string
+          name: string
+          niche: string | null
+          notes: string | null
+          project_value: number | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          close_date?: string | null
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name: string
+          niche?: string | null
+          notes?: string | null
+          project_value?: number | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          close_date?: string | null
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name?: string
+          niche?: string | null
+          notes?: string | null
+          project_value?: number | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      companies: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          id: string
+          instagram: string | null
+          name: string
+          niche: string | null
+          phone: string | null
+          state: string | null
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          name: string
+          niche?: string | null
+          phone?: string | null
+          state?: string | null
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          name?: string
+          niche?: string | null
+          phone?: string | null
+          state?: string | null
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          city: string | null
+          company_id: string | null
+          contact: string | null
+          created_at: string
+          id: string
+          name: string
+          niche: string | null
+          notes: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          city?: string | null
+          company_id?: string | null
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          niche?: string | null
+          notes?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          city?: string | null
+          company_id?: string | null
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          niche?: string | null
+          notes?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          lead_id: string | null
+          sent: boolean | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          sent?: boolean | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          sent?: boolean | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id: string
+          name?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      prompts: {
+        Row: {
+          briefing_id: string | null
+          content: string
+          created_at: string
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          briefing_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          briefing_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompts_briefing_id_fkey"
+            columns: ["briefing_id"]
+            isOneToOne: false
+            referencedRelation: "briefings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          company_name: string | null
+          logo_url: string | null
+          primary_color: string | null
+          signature: string | null
+          theme: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          signature?: string | null
+          theme?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          signature?: string | null
+          theme?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +559,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
