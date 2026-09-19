@@ -10,7 +10,8 @@ import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import { ExternalLink, MapPin, Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { NICHES, STATES, citiesOf, OTHER } from "@/lib/br-locations";
+import { NICHES, STATES, ufOf } from "@/lib/br-locations";
+import { useIbgeCities } from "@/lib/use-ibge-cities";
 
 export const Route = createFileRoute("/_authenticated/companies")({
   head: () => ({ meta: [{ title: "Empresas / Maps — KaduDev Prompt Engine" }] }),
@@ -29,13 +30,10 @@ function embedUrl(niche: string, city: string, state: string) {
 function CompaniesPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
-  const [nicheSel, setNicheSel] = useState<string>("Restaurantes");
-  const [nicheCustom, setNicheCustom] = useState("");
-  const [state, setState] = useState("Pará");
-  const [citySel, setCitySel] = useState<string>("Belém");
-  const [cityCustom, setCityCustom] = useState("");
-  const niche = nicheSel === OTHER ? nicheCustom : nicheSel;
-  const city = citySel === OTHER ? cityCustom : citySel;
+  const [niche, setNiche] = useState<string>("Restaurantes");
+  const [state, setState] = useState("Ceará");
+  const [city, setCity] = useState<string>("Fortaleza");
+  const cities = useIbgeCities(ufOf(state));
   const [searched, setSearched] = useState<{ n: string; c: string; s: string } | null>(null);
 
   const [form, setForm] = useState({ name: "", phone: "", whatsapp: "", instagram: "", address: "" });
@@ -107,16 +105,12 @@ function CompaniesPage() {
           <div className="grid gap-3 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Categoria / Nicho</Label>
-              <Select value={nicheSel} onValueChange={setNicheSel}>
+              <Select value={niche} onValueChange={setNiche}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent className="max-h-72">
                   {NICHES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-                  <SelectItem value={OTHER}>Outra categoria…</SelectItem>
                 </SelectContent>
               </Select>
-              {nicheSel === OTHER && (
-                <Input value={nicheCustom} onChange={(e) => setNicheCustom(e.target.value)} placeholder="Digite a categoria" />
-              )}
             </div>
             <div className="space-y-2">
               <Label>Estado</Label>
@@ -124,8 +118,7 @@ function CompaniesPage() {
                 value={state}
                 onValueChange={(v) => {
                   setState(v);
-                  setCitySel(citiesOf(v)[0] ?? OTHER);
-                  setCityCustom("");
+                  setCity("");
                 }}
               >
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -136,16 +129,12 @@ function CompaniesPage() {
             </div>
             <div className="space-y-2">
               <Label>Cidade</Label>
-              <Select value={citySel} onValueChange={setCitySel}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <Select value={city} onValueChange={setCity} disabled={cities.isLoading}>
+                <SelectTrigger><SelectValue placeholder={cities.isLoading ? "Carregando cidades…" : "Selecione"} /></SelectTrigger>
                 <SelectContent className="max-h-72">
-                  {citiesOf(state).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  <SelectItem value={OTHER}>Outra cidade…</SelectItem>
+                  {(cities.data ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
-              {citySel === OTHER && (
-                <Input value={cityCustom} onChange={(e) => setCityCustom(e.target.value)} placeholder="Digite a cidade" />
-              )}
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">

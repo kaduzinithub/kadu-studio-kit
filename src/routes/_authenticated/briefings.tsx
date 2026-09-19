@@ -11,6 +11,8 @@ import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NICHOS } from "@/lib/prompt-templates";
+import { STATES, ufOf, VISUAL_STYLES, AUDIENCES, GOALS, CTAS } from "@/lib/br-locations";
+import { useIbgeCities } from "@/lib/use-ibge-cities";
 
 export const Route = createFileRoute("/_authenticated/briefings")({
   head: () => ({ meta: [{ title: "Briefings — KaduDev Prompt Engine" }] }),
@@ -42,11 +44,12 @@ type Briefing = {
   notes?: string | null;
 };
 
-const FIELDS: { key: keyof Briefing; label: string; type?: "text" | "textarea" | "color" | "select" }[] = [
+type FieldType = "text" | "textarea" | "color" | "select" | "state" | "city";
+const FIELDS: { key: keyof Briefing; label: string; type?: FieldType; options?: readonly string[] }[] = [
   { key: "company_name", label: "Nome da empresa" },
-  { key: "niche", label: "Nicho", type: "select" },
-  { key: "city", label: "Cidade" },
-  { key: "state", label: "Estado" },
+  { key: "niche", label: "Nicho", type: "select", options: NICHOS },
+  { key: "state", label: "Estado", type: "state" },
+  { key: "city", label: "Cidade", type: "city" },
   { key: "phone", label: "Telefone" },
   { key: "whatsapp", label: "WhatsApp" },
   { key: "instagram", label: "Instagram" },
@@ -54,15 +57,15 @@ const FIELDS: { key: keyof Briefing; label: string; type?: "text" | "textarea" |
   { key: "address", label: "Endereço" },
   { key: "primary_color", label: "Cor principal", type: "color" },
   { key: "secondary_color", label: "Cor secundária", type: "color" },
-  { key: "style", label: "Estilo visual" },
-  { key: "audience", label: "Público-alvo" },
-  { key: "goal", label: "Objetivo do site" },
+  { key: "style", label: "Estilo visual", type: "select", options: VISUAL_STYLES },
+  { key: "audience", label: "Público-alvo", type: "select", options: AUDIENCES },
+  { key: "goal", label: "Objetivo do site", type: "select", options: GOALS },
   { key: "pages", label: "Páginas desejadas", type: "textarea" },
   { key: "services", label: "Serviços principais", type: "textarea" },
   { key: "differentials", label: "Diferenciais", type: "textarea" },
   { key: "promotions", label: "Promoções", type: "textarea" },
   { key: "hours", label: "Horário" },
-  { key: "cta", label: "CTA principal" },
+  { key: "cta", label: "CTA principal", type: "select", options: CTAS },
   { key: "notes", label: "Observações", type: "textarea" },
 ];
 
@@ -72,6 +75,7 @@ function BriefingsPage() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
   const [draft, setDraft] = useState<Briefing | null>(null);
+  const cities = useIbgeCities(draft?.state ? ufOf(draft.state) : undefined);
 
   const list = useQuery({
     queryKey: ["briefings"],
@@ -210,8 +214,31 @@ function BriefingsPage() {
                       onValueChange={(v) => setDraft({ ...draft, [f.key]: v })}
                     >
                       <SelectTrigger><SelectValue placeholder="Escolher…" /></SelectTrigger>
-                      <SelectContent>
-                        {NICHOS.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+                      <SelectContent className="max-h-72">
+                        {(f.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  ) : f.type === "state" ? (
+                    <Select
+                      value={(draft.state as string) ?? ""}
+                      onValueChange={(v) => setDraft({ ...draft, state: v, city: "" })}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Escolher…" /></SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {STATES.map((s) => <SelectItem key={s.uf} value={s.name}>{s.name} ({s.uf})</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  ) : f.type === "city" ? (
+                    <Select
+                      value={(draft.city as string) ?? ""}
+                      onValueChange={(v) => setDraft({ ...draft, city: v })}
+                      disabled={!draft.state || cities.isLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={!draft.state ? "Escolha o estado primeiro" : cities.isLoading ? "Carregando cidades…" : "Escolher…"} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {(cities.data ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   ) : (
