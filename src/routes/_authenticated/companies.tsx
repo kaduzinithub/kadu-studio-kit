@@ -106,16 +106,46 @@ function CompaniesPage() {
           </h3>
           <div className="grid gap-3 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Nicho</Label>
-              <Input value={niche} onChange={(e) => setNiche(e.target.value)} placeholder="restaurantes" />
-            </div>
-            <div className="space-y-2">
-              <Label>Cidade</Label>
-              <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Belém" />
+              <Label>Categoria / Nicho</Label>
+              <Select value={nicheSel} onValueChange={setNicheSel}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {NICHES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+                  <SelectItem value={OTHER}>Outra categoria…</SelectItem>
+                </SelectContent>
+              </Select>
+              {nicheSel === OTHER && (
+                <Input value={nicheCustom} onChange={(e) => setNicheCustom(e.target.value)} placeholder="Digite a categoria" />
+              )}
             </div>
             <div className="space-y-2">
               <Label>Estado</Label>
-              <Input value={state} onChange={(e) => setState(e.target.value)} placeholder="Pará" />
+              <Select
+                value={state}
+                onValueChange={(v) => {
+                  setState(v);
+                  setCitySel(citiesOf(v)[0] ?? OTHER);
+                  setCityCustom("");
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {STATES.map((s) => <SelectItem key={s.uf} value={s.name}>{s.name} ({s.uf})</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Cidade</Label>
+              <Select value={citySel} onValueChange={setCitySel}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {citiesOf(state).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  <SelectItem value={OTHER}>Outra cidade…</SelectItem>
+                </SelectContent>
+              </Select>
+              {citySel === OTHER && (
+                <Input value={cityCustom} onChange={(e) => setCityCustom(e.target.value)} placeholder="Digite a cidade" />
+              )}
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
