@@ -75,6 +75,7 @@ function BriefingsPage() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
   const [draft, setDraft] = useState<Briefing | null>(null);
+  const cities = useIbgeCities(draft?.state ? ufOf(draft.state) : undefined);
 
   const list = useQuery({
     queryKey: ["briefings"],
@@ -213,8 +214,31 @@ function BriefingsPage() {
                       onValueChange={(v) => setDraft({ ...draft, [f.key]: v })}
                     >
                       <SelectTrigger><SelectValue placeholder="Escolher…" /></SelectTrigger>
-                      <SelectContent>
-                        {NICHOS.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+                      <SelectContent className="max-h-72">
+                        {(f.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  ) : f.type === "state" ? (
+                    <Select
+                      value={(draft.state as string) ?? ""}
+                      onValueChange={(v) => setDraft({ ...draft, state: v, city: "" })}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Escolher…" /></SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {STATES.map((s) => <SelectItem key={s.uf} value={s.name}>{s.name} ({s.uf})</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  ) : f.type === "city" ? (
+                    <Select
+                      value={(draft.city as string) ?? ""}
+                      onValueChange={(v) => setDraft({ ...draft, city: v })}
+                      disabled={!draft.state || cities.isLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={!draft.state ? "Escolha o estado primeiro" : cities.isLoading ? "Carregando cidades…" : "Escolher…"} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {(cities.data ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   ) : (
