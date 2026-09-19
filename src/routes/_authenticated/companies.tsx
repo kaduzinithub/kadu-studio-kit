@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import { ExternalLink, MapPin, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NICHES, STATES, citiesOf, OTHER } from "@/lib/br-locations";
 
 export const Route = createFileRoute("/_authenticated/companies")({
   head: () => ({ meta: [{ title: "Empresas / Maps — KaduDev Prompt Engine" }] }),
