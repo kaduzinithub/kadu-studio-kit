@@ -29,9 +29,13 @@ function embedUrl(niche: string, city: string, state: string) {
 function CompaniesPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
-  const [niche, setNiche] = useState("restaurantes");
-  const [city, setCity] = useState("Belém");
+  const [nicheSel, setNicheSel] = useState<string>("Restaurantes");
+  const [nicheCustom, setNicheCustom] = useState("");
   const [state, setState] = useState("Pará");
+  const [citySel, setCitySel] = useState<string>("Belém");
+  const [cityCustom, setCityCustom] = useState("");
+  const niche = nicheSel === OTHER ? nicheCustom : nicheSel;
+  const city = citySel === OTHER ? cityCustom : citySel;
   const [searched, setSearched] = useState<{ n: string; c: string; s: string } | null>(null);
 
   const [form, setForm] = useState({ name: "", phone: "", whatsapp: "", instagram: "", address: "" });
