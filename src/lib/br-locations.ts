@@ -120,6 +120,27 @@ export const GOALS = [
   "Mostrar localização e contato",
 ] as const;
 
+export const SITE_PAGES = [
+  "Home",
+  "Sobre nós",
+  "Serviços",
+  "Produtos",
+  "Cardápio / Catálogo",
+  "Galeria de fotos",
+  "Portfólio",
+  "Depoimentos",
+  "Promoções",
+  "Blog",
+  "Agendamento",
+  "Reservas",
+  "Equipe",
+  "FAQ / Dúvidas",
+  "Localização",
+  "Contato",
+  "Trabalhe conosco",
+  "Política de privacidade",
+] as const;
+
 export const CTAS = [
   "Chamar no WhatsApp",
   "Solicitar orçamento",
