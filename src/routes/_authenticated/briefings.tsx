@@ -239,7 +239,7 @@ function BriefingsPage() {
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
-                        value={(draft[f.key] as string) || "#ff7a00"}
+                        value={(draft[f.key] as string) || "#d4af37"}
                         onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
                         className="h-9 w-14 rounded-lg border border-border bg-transparent cursor-pointer"
                       />
@@ -293,7 +293,7 @@ function BriefingsPage() {
 
             <div className="flex items-center gap-3 pt-2 border-t border-border">
               <span className="text-xs text-muted-foreground">Preview:</span>
-              <div className="h-8 w-8 rounded-lg border border-border" style={{ background: draft.primary_color || "#ff7a00" }} />
+              <div className="h-8 w-8 rounded-lg border border-border" style={{ background: draft.primary_color || "#d4af37" }} />
               <div className="h-8 w-8 rounded-lg border border-border" style={{ background: draft.secondary_color || "#111" }} />
               <div className="ml-auto flex gap-2">
                 <Button variant="ghost" onClick={() => remove.mutate(draft.id)}>Remover</Button>

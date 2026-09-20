@@ -25,7 +25,7 @@ function SettingsPage() {
       const { data } = await supabase.from("settings").select("*").eq("user_id", user.id).maybeSingle();
       return data ?? {
         user_id: user.id, company_name: "KaduDev Studios", logo_url: null,
-        primary_color: "#ff7a00", signature: "Equipa KaduDev Studios", theme: "dark",
+        primary_color: "#d4af37", signature: "Equipa KaduDev Studios", theme: "dark",
       };
     },
   });
@@ -35,7 +35,7 @@ function SettingsPage() {
     if (settings.data) setForm({
       company_name: settings.data.company_name ?? "",
       logo_url: settings.data.logo_url ?? "",
-      primary_color: settings.data.primary_color ?? "#ff7a00",
+      primary_color: settings.data.primary_color ?? "#d4af37",
       signature: settings.data.signature ?? "",
       theme: settings.data.theme ?? "dark",
     });
@@ -65,7 +65,7 @@ function SettingsPage() {
           <div className="space-y-1.5">
             <Label>Cor principal</Label>
             <div className="flex gap-2">
-              <input type="color" value={form.primary_color ?? "#ff7a00"} onChange={(e) => setForm({ ...form, primary_color: e.target.value })} className="h-9 w-14 rounded-lg border border-border bg-transparent" />
+              <input type="color" value={form.primary_color ?? "#d4af37"} onChange={(e) => setForm({ ...form, primary_color: e.target.value })} className="h-9 w-14 rounded-lg border border-border bg-transparent" />
               <Input value={form.primary_color ?? ""} onChange={(e) => setForm({ ...form, primary_color: e.target.value })} />
             </div>
           </div>
