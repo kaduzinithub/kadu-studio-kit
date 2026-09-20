@@ -44,7 +44,7 @@ type Briefing = {
   notes?: string | null;
 };
 
-type FieldType = "text" | "textarea" | "color" | "select" | "state" | "city";
+type FieldType = "text" | "textarea" | "color" | "select" | "state" | "city" | "pages";
 const FIELDS: { key: keyof Briefing; label: string; type?: FieldType; options?: readonly string[] }[] = [
   { key: "company_name", label: "Nome da empresa" },
   { key: "niche", label: "Nicho", type: "select", options: NICHOS },
@@ -60,7 +60,7 @@ const FIELDS: { key: keyof Briefing; label: string; type?: FieldType; options?: 
   { key: "style", label: "Estilo visual", type: "select", options: VISUAL_STYLES },
   { key: "audience", label: "Público-alvo", type: "select", options: AUDIENCES },
   { key: "goal", label: "Objetivo do site", type: "select", options: GOALS },
-  { key: "pages", label: "Páginas desejadas", type: "textarea" },
+  { key: "pages", label: "Páginas desejadas", type: "pages" },
   { key: "services", label: "Serviços principais", type: "textarea" },
   { key: "differentials", label: "Diferenciais", type: "textarea" },
   { key: "promotions", label: "Promoções", type: "textarea" },
