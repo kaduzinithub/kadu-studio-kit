@@ -69,6 +69,13 @@ const FIELDS: { key: keyof Briefing; label: string; type?: FieldType; options?: 
   { key: "notes", label: "Observações", type: "textarea" },
 ];
 
+function splitPages(value: string | null | undefined): { known: string[]; extra: string } {
+  const parts = (value ?? "").split(/[,\n]/).map((p) => p.trim()).filter(Boolean);
+  const known = parts.filter((p) => (SITE_PAGES as readonly string[]).includes(p));
+  const extra = parts.filter((p) => !(SITE_PAGES as readonly string[]).includes(p)).join(", ");
+  return { known, extra };
+}
+
 function BriefingsPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
@@ -187,9 +194,42 @@ function BriefingsPage() {
           <Card className="p-6 space-y-5">
             <div className="grid gap-4 md:grid-cols-2">
               {FIELDS.map((f) => (
-                <div key={f.key} className={`space-y-1.5 ${f.type === "textarea" ? "md:col-span-2" : ""}`}>
+                <div key={f.key} className={`space-y-1.5 ${f.type === "textarea" || f.type === "pages" ? "md:col-span-2" : ""}`}>
                   <Label className="text-xs">{f.label}</Label>
-                  {f.type === "textarea" ? (
+                  {f.type === "pages" ? (
+                    (() => {
+                      const { known, extra } = splitPages(draft.pages);
+                      const setPages = (nextKnown: string[], nextExtra: string) =>
+                        setDraft({
+                          ...draft,
+                          pages: [...nextKnown, ...nextExtra.split(",").map((s) => s.trim()).filter(Boolean)].join(", "),
+                        });
+                      return (
+                        <div className="space-y-3">
+                          <div className="flex flex-wrap gap-2">
+                            {SITE_PAGES.map((p) => {
+                              const active = known.includes(p);
+                              return (
+                                <button
+                                  key={p}
+                                  type="button"
+                                  onClick={() => setPages(active ? known.filter((k) => k !== p) : [...known, p], extra)}
+                                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${active ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:border-primary/50"}`}
+                                >
+                                  {p}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <Input
+                            placeholder="Outras páginas (separadas por vírgula)…"
+                            value={extra}
+                            onChange={(e) => setPages(known, e.target.value)}
+                          />
+                        </div>
+                      );
+                    })()
+                  ) : f.type === "textarea" ? (
                     <Textarea
                       rows={3}
                       value={(draft[f.key] as string) ?? ""}
