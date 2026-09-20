@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NICHOS } from "@/lib/prompt-templates";
-import { STATES, ufOf, VISUAL_STYLES, AUDIENCES, GOALS, CTAS } from "@/lib/br-locations";
+import { STATES, ufOf, VISUAL_STYLES, AUDIENCES, GOALS, CTAS, SITE_PAGES } from "@/lib/br-locations";
 import { useIbgeCities } from "@/lib/use-ibge-cities";
 
 export const Route = createFileRoute("/_authenticated/briefings")({
