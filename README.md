@@ -468,10 +468,12 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 Além das variáveis Supabase já configuradas, defina no ambiente de servidor:
 
 ```sh
-GROQ_API_KEY=sua_chave_da_groq
+OPENROUTER_API_KEY=sua_chave_da_openrouter
+AI_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
+AI_FALLBACK_MODELS=poolside/laguna-s-2.1:free,cohere/north-mini-code:free,openrouter/free
 ```
 
-O modelo padrão é `openai/gpt-oss-120b`, via endpoint compatível com OpenAI da Groq. Briefings são enviados somente no momento em que o utilizador solicita a geração.
+O gerador tenta os modelos em ordem. Se um estiver indisponível, atingir limite ou retornar uma resposta inválida, tenta o próximo automaticamente. Briefings são enviados somente no momento em que o utilizador solicita a geração; a chave OpenRouter jamais é exposta ao navegador.
 
 Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
