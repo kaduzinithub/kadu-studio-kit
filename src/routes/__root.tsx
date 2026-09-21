@@ -80,22 +80,45 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "KaduDev Prompt Engine" },
-      { name: "description", content: "Plataforma privada da KaduDev Studios para prospeção, briefings, geração de prompts e mensagens comerciais." },
+      {
+        name: "description",
+        content:
+          "Plataforma privada da KaduDev Studios para prospeção, briefings, geração de prompts e mensagens comerciais.",
+      },
       { name: "author", content: "KaduDev Studios" },
       { property: "og:title", content: "KaduDev Prompt Engine" },
-      { property: "og:description", content: "Plataforma privada da KaduDev Studios para prospeção, briefings, geração de prompts e mensagens comerciais." },
+      {
+        property: "og:description",
+        content:
+          "Plataforma privada da KaduDev Studios para prospeção, briefings, geração de prompts e mensagens comerciais.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "KaduDev Prompt Engine" },
-      { name: "twitter:description", content: "Plataforma privada da KaduDev Studios para prospeção, briefings, geração de prompts e mensagens comerciais." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/df4f4e89-9d0f-473b-a2ac-44f5c8bedfee/id-preview-93a7745d--20bc3711-2234-4ec0-abc1-63dcb8bc0009.lovable.app-1785267779242.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/df4f4e89-9d0f-473b-a2ac-44f5c8bedfee/id-preview-93a7745d--20bc3711-2234-4ec0-abc1-63dcb8bc0009.lovable.app-1785267779242.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Plataforma privada da KaduDev Studios para prospeção, briefings, geração de prompts e mensagens comerciais.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/df4f4e89-9d0f-473b-a2ac-44f5c8bedfee/id-preview-93a7745d--20bc3711-2234-4ec0-abc1-63dcb8bc0009.lovable.app-1785267779242.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/df4f4e89-9d0f-473b-a2ac-44f5c8bedfee/id-preview-93a7745d--20bc3711-2234-4ec0-abc1-63dcb8bc0009.lovable.app-1785267779242.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
-       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap",
+      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),

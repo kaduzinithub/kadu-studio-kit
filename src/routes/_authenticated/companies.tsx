@@ -9,7 +9,13 @@ import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import { ExternalLink, MapPin, Plus } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { NICHES, STATES, ufOf } from "@/lib/br-locations";
 import { useIbgeCities } from "@/lib/use-ibge-cities";
 
@@ -36,12 +42,21 @@ function CompaniesPage() {
   const cities = useIbgeCities(ufOf(state));
   const [searched, setSearched] = useState<{ n: string; c: string; s: string } | null>(null);
 
-  const [form, setForm] = useState({ name: "", phone: "", whatsapp: "", instagram: "", address: "" });
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    whatsapp: "",
+    instagram: "",
+    address: "",
+  });
 
   const companies = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("companies").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("companies")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -67,7 +82,14 @@ function CompaniesPage() {
   });
 
   const addToPipeline = useMutation({
-    mutationFn: async (c: { id: string; name: string; whatsapp?: string | null; phone?: string | null; niche?: string | null; city?: string | null }) => {
+    mutationFn: async (c: {
+      id: string;
+      name: string;
+      whatsapp?: string | null;
+      phone?: string | null;
+      niche?: string | null;
+      city?: string | null;
+    }) => {
       const { error } = await supabase.from("leads").insert({
         user_id: user.id,
         company_id: c.id,
@@ -106,9 +128,15 @@ function CompaniesPage() {
             <div className="space-y-2">
               <Label>Categoria / Nicho</Label>
               <Select value={niche} onValueChange={setNiche}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent className="max-h-72">
-                  {NICHES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+                  {NICHES.map((n) => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -121,18 +149,32 @@ function CompaniesPage() {
                   setCity("");
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent className="max-h-72">
-                  {STATES.map((s) => <SelectItem key={s.uf} value={s.name}>{s.name} ({s.uf})</SelectItem>)}
+                  {STATES.map((s) => (
+                    <SelectItem key={s.uf} value={s.name}>
+                      {s.name} ({s.uf})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Cidade</Label>
               <Select value={city} onValueChange={setCity} disabled={cities.isLoading}>
-                <SelectTrigger><SelectValue placeholder={cities.isLoading ? "Carregando cidades…" : "Selecione"} /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={cities.isLoading ? "Carregando cidades…" : "Selecione"}
+                  />
+                </SelectTrigger>
                 <SelectContent className="max-h-72">
-                  {(cities.data ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {(cities.data ?? []).map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -143,7 +185,11 @@ function CompaniesPage() {
             </Button>
             {searched && (
               <Button variant="outline" asChild>
-                <a href={mapsUrl(searched.n, searched.c, searched.s)} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={mapsUrl(searched.n, searched.c, searched.s)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <ExternalLink className="h-4 w-4 mr-2" /> Abrir no Google Maps
                 </a>
               </Button>
@@ -183,7 +229,7 @@ function CompaniesPage() {
             ))}
             <Button
               className="w-full"
-              onClick={() => form.name ? addCompany.mutate(form) : toast.error("Informe o nome")}
+              onClick={() => (form.name ? addCompany.mutate(form) : toast.error("Informe o nome"))}
               disabled={addCompany.isPending}
             >
               Adicionar empresa

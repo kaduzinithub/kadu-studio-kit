@@ -8,7 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/app-shell";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { brl, fmtDate } from "@/lib/format";
 
@@ -23,15 +29,24 @@ function ClientsPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [openNew, setOpenNew] = useState(false);
   const [form, setForm] = useState({
-    name: "", niche: "", city: "", project_value: "0",
-    close_date: "", status: "ativo", domain: "", notes: "",
+    name: "",
+    niche: "",
+    city: "",
+    project_value: "0",
+    close_date: "",
+    status: "ativo",
+    domain: "",
+    notes: "",
   });
   const [activity, setActivity] = useState("");
 
   const clients = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("clients").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("clients")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -41,7 +56,11 @@ function ClientsPage() {
     queryKey: ["activities", selected],
     enabled: !!selected,
     queryFn: async () => {
-      const { data, error } = await supabase.from("activities").select("*").eq("client_id", selected!).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("client_id", selected!)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -60,7 +79,16 @@ function ClientsPage() {
     onSuccess: () => {
       toast.success("Cliente adicionado");
       setOpenNew(false);
-      setForm({ name: "", niche: "", city: "", project_value: "0", close_date: "", status: "ativo", domain: "", notes: "" });
+      setForm({
+        name: "",
+        niche: "",
+        city: "",
+        project_value: "0",
+        close_date: "",
+        status: "ativo",
+        domain: "",
+        notes: "",
+      });
       qc.invalidateQueries({ queryKey: ["clients"] });
     },
     onError: (e) => toast.error((e as Error).message),
@@ -69,11 +97,17 @@ function ClientsPage() {
   const addActivity = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("activities").insert({
-        user_id: user.id, client_id: selected, type: "nota", note: activity,
+        user_id: user.id,
+        client_id: selected,
+        type: "nota",
+        note: activity,
       });
       if (error) throw error;
     },
-    onSuccess: () => { setActivity(""); qc.invalidateQueries({ queryKey: ["activities", selected] }); },
+    onSuccess: () => {
+      setActivity("");
+      qc.invalidateQueries({ queryKey: ["activities", selected] });
+    },
   });
 
   const selectedClient = clients.data?.find((c) => c.id === selected);
@@ -85,14 +119,25 @@ function ClientsPage() {
         description="Contratos fechados e timeline de atividades."
         actions={
           <Dialog open={openNew} onOpenChange={setOpenNew}>
-            <DialogTrigger asChild><Button>+ Novo cliente</Button></DialogTrigger>
+            <DialogTrigger asChild>
+              <Button>+ Novo cliente</Button>
+            </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Novo cliente</DialogTitle></DialogHeader>
+              <DialogHeader>
+                <DialogTitle>Novo cliente</DialogTitle>
+              </DialogHeader>
               <div className="grid gap-3 md:grid-cols-2">
-                {([
-                  ["name", "Nome"], ["niche", "Nicho"], ["city", "Cidade"], ["project_value", "Valor do projeto"],
-                  ["close_date", "Data de fechamento"], ["status", "Status"], ["domain", "Domínio"],
-                ] as const).map(([k, l]) => (
+                {(
+                  [
+                    ["name", "Nome"],
+                    ["niche", "Nicho"],
+                    ["city", "Cidade"],
+                    ["project_value", "Valor do projeto"],
+                    ["close_date", "Data de fechamento"],
+                    ["status", "Status"],
+                    ["domain", "Domínio"],
+                  ] as const
+                ).map(([k, l]) => (
                   <div key={k} className="space-y-1.5">
                     <Label>{l}</Label>
                     <Input
@@ -104,7 +149,10 @@ function ClientsPage() {
                 ))}
                 <div className="space-y-1.5 md:col-span-2">
                   <Label>Observações</Label>
-                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+                  <Textarea
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  />
                 </div>
               </div>
               <Button onClick={() => create.mutate()}>Guardar</Button>
@@ -147,7 +195,11 @@ function ClientsPage() {
                   </tr>
                 ))}
                 {(clients.data ?? []).length === 0 && (
-                  <tr><td colSpan={6} className="py-8 text-center text-muted-foreground">Nenhum cliente ainda.</td></tr>
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                      Nenhum cliente ainda.
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -162,7 +214,11 @@ function ClientsPage() {
                 {selectedClient.name} · {selectedClient.domain || "sem domínio"}
               </div>
               <div className="flex gap-2 mb-3">
-                <Input placeholder="Nova nota…" value={activity} onChange={(e) => setActivity(e.target.value)} />
+                <Input
+                  placeholder="Nova nota…"
+                  value={activity}
+                  onChange={(e) => setActivity(e.target.value)}
+                />
                 <Button onClick={() => activity && addActivity.mutate()}>+</Button>
               </div>
               <div className="space-y-2 max-h-[50vh] overflow-y-auto">
@@ -174,11 +230,15 @@ function ClientsPage() {
                     {a.note}
                   </div>
                 ))}
-                {(activities.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">Sem atividades.</p>}
+                {(activities.data ?? []).length === 0 && (
+                  <p className="text-sm text-muted-foreground">Sem atividades.</p>
+                )}
               </div>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">Selecione um cliente para ver a timeline.</p>
+            <p className="text-sm text-muted-foreground">
+              Selecione um cliente para ver a timeline.
+            </p>
           )}
         </Card>
       </div>

@@ -7,10 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
-import { MESSAGE_TYPES, renderMessage, whatsappUrl, type MessageType } from "@/lib/message-templates";
+import {
+  MESSAGE_TYPES,
+  renderMessage,
+  whatsappUrl,
+  type MessageType,
+} from "@/lib/message-templates";
 import { Copy, Send } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/messages")({
@@ -33,7 +44,10 @@ function MessagesPage() {
   const leads = useQuery({
     queryKey: ["leads"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("leads").select("id,name,city,niche,whatsapp").order("updated_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("leads")
+        .select("id,name,city,niche,whatsapp")
+        .order("updated_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -42,7 +56,11 @@ function MessagesPage() {
   const settings = useQuery({
     queryKey: ["settings", user.id],
     queryFn: async () => {
-      const { data } = await supabase.from("settings").select("*").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase
+        .from("settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
       return data;
     },
   });
@@ -109,32 +127,69 @@ function MessagesPage() {
             <div className="space-y-1.5">
               <Label>Tipo</Label>
               <Select value={type} onValueChange={(v) => setType(v as MessageType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {MESSAGE_TYPES.map((t) => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}
+                  {MESSAGE_TYPES.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Lead</Label>
               <Select value={leadId} onValueChange={setLeadId}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="manual">Manual (sem lead)</SelectItem>
-                  {(leads.data ?? []).map((l) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                  {(leads.data ?? []).map((l) => (
+                    <SelectItem key={l.id} value={l.id}>
+                      {l.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5"><Label>Empresa</Label><Input value={empresa} onChange={(e) => setEmpresa(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>Cidade</Label><Input value={cidade} onChange={(e) => setCidade(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>Nicho</Label><Input value={nicho} onChange={(e) => setNicho(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>WhatsApp (com DDI)</Label><Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="5591999999999" /></div>
-            <div className="space-y-1.5 md:col-span-2"><Label>Assinatura</Label><Input value={assinatura} onChange={(e) => setAssinatura(e.target.value)} /></div>
+            <div className="space-y-1.5">
+              <Label>Empresa</Label>
+              <Input value={empresa} onChange={(e) => setEmpresa(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Cidade</Label>
+              <Input value={cidade} onChange={(e) => setCidade(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Nicho</Label>
+              <Input value={nicho} onChange={(e) => setNicho(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>WhatsApp (com DDI)</Label>
+              <Input
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                placeholder="5591999999999"
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label>Assinatura</Label>
+              <Input value={assinatura} onChange={(e) => setAssinatura(e.target.value)} />
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={openWhatsApp} className="gap-2"><Send className="h-4 w-4" /> Enviar no WhatsApp</Button>
-            <Button variant="outline" onClick={copy}><Copy className="h-4 w-4 mr-1" /> Copiar</Button>
-            <Button variant="ghost" onClick={() => save.mutate()}>Guardar</Button>
+            <Button onClick={openWhatsApp} className="gap-2">
+              <Send className="h-4 w-4" /> Enviar no WhatsApp
+            </Button>
+            <Button variant="outline" onClick={copy}>
+              <Copy className="h-4 w-4 mr-1" /> Copiar
+            </Button>
+            <Button variant="ghost" onClick={() => save.mutate()}>
+              Guardar
+            </Button>
           </div>
         </Card>
 
@@ -143,7 +198,11 @@ function MessagesPage() {
             <h3 className="font-medium">Preview</h3>
             <span className="text-xs text-muted-foreground">{content.length} caracteres</span>
           </div>
-          <Textarea value={content} onChange={(e) => setContent(e.target.value)} className="min-h-[420px] whitespace-pre-wrap" />
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[420px] whitespace-pre-wrap"
+          />
         </Card>
       </div>
     </div>

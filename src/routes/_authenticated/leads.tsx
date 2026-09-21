@@ -8,7 +8,13 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/leads")({
@@ -16,7 +22,15 @@ export const Route = createFileRoute("/_authenticated/leads")({
   component: LeadsPage,
 });
 
-const STATUSES = ["novo", "contactado", "respondeu", "reuniao", "proposta", "fechado", "perdido"] as const;
+const STATUSES = [
+  "novo",
+  "contactado",
+  "respondeu",
+  "reuniao",
+  "proposta",
+  "fechado",
+  "perdido",
+] as const;
 const STATUS_LABEL: Record<string, string> = {
   novo: "Novo",
   contactado: "Contactado",
@@ -36,7 +50,10 @@ function LeadsPage() {
   const leads = useQuery({
     queryKey: ["leads"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("leads").select("*").order("updated_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("leads")
+        .select("*")
+        .order("updated_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -45,8 +62,11 @@ function LeadsPage() {
   const filtered = useMemo(() => {
     const items = leads.data ?? [];
     return items.filter((l) => {
-      const okSearch = !search ||
-        [l.name, l.contact, l.whatsapp, l.city, l.niche, l.notes].some((v) => v && (v as string).toLowerCase().includes(search.toLowerCase()));
+      const okSearch =
+        !search ||
+        [l.name, l.contact, l.whatsapp, l.city, l.niche, l.notes].some(
+          (v) => v && (v as string).toLowerCase().includes(search.toLowerCase()),
+        );
       const okStatus = filter === "todos" || l.status === filter;
       return okSearch && okStatus;
     });
@@ -63,7 +83,9 @@ function LeadsPage() {
 
   const createLead = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("leads").insert({ user_id: user.id, name: "Novo lead", status: "novo" });
+      const { error } = await supabase
+        .from("leads")
+        .insert({ user_id: user.id, name: "Novo lead", status: "novo" });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
@@ -94,12 +116,23 @@ function LeadsPage() {
         <TabsContent value="tabela">
           <Card className="p-4 mt-4">
             <div className="flex flex-wrap gap-3 mb-4">
-              <Input placeholder="Pesquisar…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+              <Input
+                placeholder="Pesquisar…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="max-w-xs"
+              />
               <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos os estados</SelectItem>
-                  {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
+                  {STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {STATUS_LABEL[s]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -123,20 +156,35 @@ function LeadsPage() {
                       <td className="py-3">{l.city}</td>
                       <td className="py-3">{l.whatsapp}</td>
                       <td className="py-3">
-                        <Select value={l.status} onValueChange={(v) => updateStatus.mutate({ id: l.id, status: v })}>
-                          <SelectTrigger className="w-36 h-8"><SelectValue /></SelectTrigger>
+                        <Select
+                          value={l.status}
+                          onValueChange={(v) => updateStatus.mutate({ id: l.id, status: v })}
+                        >
+                          <SelectTrigger className="w-36 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
-                            {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
+                            {STATUSES.map((s) => (
+                              <SelectItem key={s} value={s}>
+                                {STATUS_LABEL[s]}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </td>
                       <td className="py-3 text-right">
-                        <Button size="sm" variant="ghost" onClick={() => deleteLead.mutate(l.id)}>Remover</Button>
+                        <Button size="sm" variant="ghost" onClick={() => deleteLead.mutate(l.id)}>
+                          Remover
+                        </Button>
                       </td>
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={6} className="py-8 text-center text-muted-foreground">Nenhum lead encontrado.</td></tr>
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                        Nenhum lead encontrado.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
@@ -161,17 +209,21 @@ function LeadsPage() {
                   <span>{(leads.data ?? []).filter((l) => l.status === s).length}</span>
                 </div>
                 <div className="space-y-2">
-                  {(leads.data ?? []).filter((l) => l.status === s).map((l) => (
-                    <div
-                      key={l.id}
-                      draggable
-                      onDragStart={(e) => e.dataTransfer.setData("id", l.id)}
-                      className="rounded-xl border border-border bg-muted/40 p-3 cursor-grab active:cursor-grabbing"
-                    >
-                      <div className="text-sm font-medium truncate">{l.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{l.niche} · {l.city}</div>
-                    </div>
-                  ))}
+                  {(leads.data ?? [])
+                    .filter((l) => l.status === s)
+                    .map((l) => (
+                      <div
+                        key={l.id}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData("id", l.id)}
+                        className="rounded-xl border border-border bg-muted/40 p-3 cursor-grab active:cursor-grabbing"
+                      >
+                        <div className="text-sm font-medium truncate">{l.name}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {l.niche} · {l.city}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </Card>
             ))}

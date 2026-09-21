@@ -1,561 +1,590 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       activities: {
         Row: {
-          client_id: string | null
-          created_at: string
-          id: string
-          note: string | null
-          type: string
-          user_id: string
-        }
+          client_id: string | null;
+          created_at: string;
+          id: string;
+          note: string | null;
+          type: string;
+          user_id: string;
+        };
         Insert: {
-          client_id?: string | null
-          created_at?: string
-          id?: string
-          note?: string | null
-          type: string
-          user_id: string
-        }
+          client_id?: string | null;
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          type: string;
+          user_id: string;
+        };
         Update: {
-          client_id?: string | null
-          created_at?: string
-          id?: string
-          note?: string | null
-          type?: string
-          user_id?: string
-        }
+          client_id?: string | null;
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          type?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "activities_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
+            foreignKeyName: "activities_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       briefings: {
         Row: {
-          address: string | null
-          audience: string | null
-          city: string | null
-          company_name: string
-          created_at: string
-          cta: string | null
-          differentials: string | null
-          email: string | null
-          goal: string | null
-          hours: string | null
-          id: string
-          instagram: string | null
-          niche: string | null
-          notes: string | null
-          pages: string | null
-          phone: string | null
-          primary_color: string | null
-          promotions: string | null
-          secondary_color: string | null
-          services: string | null
-          state: string | null
-          style: string | null
-          updated_at: string
-          user_id: string
-          whatsapp: string | null
-        }
+          address: string | null;
+          audience: string | null;
+          city: string | null;
+          company_name: string;
+          created_at: string;
+          cta: string | null;
+          differentials: string | null;
+          email: string | null;
+          goal: string | null;
+          hours: string | null;
+          id: string;
+          instagram: string | null;
+          niche: string | null;
+          notes: string | null;
+          pages: string | null;
+          phone: string | null;
+          primary_color: string | null;
+          promotions: string | null;
+          secondary_color: string | null;
+          services: string | null;
+          state: string | null;
+          style: string | null;
+          updated_at: string;
+          user_id: string;
+          whatsapp: string | null;
+        };
         Insert: {
-          address?: string | null
-          audience?: string | null
-          city?: string | null
-          company_name: string
-          created_at?: string
-          cta?: string | null
-          differentials?: string | null
-          email?: string | null
-          goal?: string | null
-          hours?: string | null
-          id?: string
-          instagram?: string | null
-          niche?: string | null
-          notes?: string | null
-          pages?: string | null
-          phone?: string | null
-          primary_color?: string | null
-          promotions?: string | null
-          secondary_color?: string | null
-          services?: string | null
-          state?: string | null
-          style?: string | null
-          updated_at?: string
-          user_id: string
-          whatsapp?: string | null
-        }
+          address?: string | null;
+          audience?: string | null;
+          city?: string | null;
+          company_name: string;
+          created_at?: string;
+          cta?: string | null;
+          differentials?: string | null;
+          email?: string | null;
+          goal?: string | null;
+          hours?: string | null;
+          id?: string;
+          instagram?: string | null;
+          niche?: string | null;
+          notes?: string | null;
+          pages?: string | null;
+          phone?: string | null;
+          primary_color?: string | null;
+          promotions?: string | null;
+          secondary_color?: string | null;
+          services?: string | null;
+          state?: string | null;
+          style?: string | null;
+          updated_at?: string;
+          user_id: string;
+          whatsapp?: string | null;
+        };
         Update: {
-          address?: string | null
-          audience?: string | null
-          city?: string | null
-          company_name?: string
-          created_at?: string
-          cta?: string | null
-          differentials?: string | null
-          email?: string | null
-          goal?: string | null
-          hours?: string | null
-          id?: string
-          instagram?: string | null
-          niche?: string | null
-          notes?: string | null
-          pages?: string | null
-          phone?: string | null
-          primary_color?: string | null
-          promotions?: string | null
-          secondary_color?: string | null
-          services?: string | null
-          state?: string | null
-          style?: string | null
-          updated_at?: string
-          user_id?: string
-          whatsapp?: string | null
-        }
-        Relationships: []
-      }
+          address?: string | null;
+          audience?: string | null;
+          city?: string | null;
+          company_name?: string;
+          created_at?: string;
+          cta?: string | null;
+          differentials?: string | null;
+          email?: string | null;
+          goal?: string | null;
+          hours?: string | null;
+          id?: string;
+          instagram?: string | null;
+          niche?: string | null;
+          notes?: string | null;
+          pages?: string | null;
+          phone?: string | null;
+          primary_color?: string | null;
+          promotions?: string | null;
+          secondary_color?: string | null;
+          services?: string | null;
+          state?: string | null;
+          style?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          whatsapp?: string | null;
+        };
+        Relationships: [];
+      };
       clients: {
         Row: {
-          city: string | null
-          close_date: string | null
-          created_at: string
-          domain: string | null
-          id: string
-          name: string
-          niche: string | null
-          notes: string | null
-          project_value: number | null
-          status: string | null
-          user_id: string
-        }
+          city: string | null;
+          close_date: string | null;
+          created_at: string;
+          domain: string | null;
+          id: string;
+          name: string;
+          niche: string | null;
+          notes: string | null;
+          project_value: number | null;
+          status: string | null;
+          user_id: string;
+        };
         Insert: {
-          city?: string | null
-          close_date?: string | null
-          created_at?: string
-          domain?: string | null
-          id?: string
-          name: string
-          niche?: string | null
-          notes?: string | null
-          project_value?: number | null
-          status?: string | null
-          user_id: string
-        }
+          city?: string | null;
+          close_date?: string | null;
+          created_at?: string;
+          domain?: string | null;
+          id?: string;
+          name: string;
+          niche?: string | null;
+          notes?: string | null;
+          project_value?: number | null;
+          status?: string | null;
+          user_id: string;
+        };
         Update: {
-          city?: string | null
-          close_date?: string | null
-          created_at?: string
-          domain?: string | null
-          id?: string
-          name?: string
-          niche?: string | null
-          notes?: string | null
-          project_value?: number | null
-          status?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
+          city?: string | null;
+          close_date?: string | null;
+          created_at?: string;
+          domain?: string | null;
+          id?: string;
+          name?: string;
+          niche?: string | null;
+          notes?: string | null;
+          project_value?: number | null;
+          status?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       companies: {
         Row: {
-          address: string | null
-          city: string | null
-          created_at: string
-          id: string
-          instagram: string | null
-          name: string
-          niche: string | null
-          phone: string | null
-          state: string | null
-          user_id: string
-          whatsapp: string | null
-        }
+          address: string | null;
+          city: string | null;
+          created_at: string;
+          id: string;
+          instagram: string | null;
+          name: string;
+          niche: string | null;
+          phone: string | null;
+          state: string | null;
+          user_id: string;
+          whatsapp: string | null;
+        };
         Insert: {
-          address?: string | null
-          city?: string | null
-          created_at?: string
-          id?: string
-          instagram?: string | null
-          name: string
-          niche?: string | null
-          phone?: string | null
-          state?: string | null
-          user_id: string
-          whatsapp?: string | null
-        }
+          address?: string | null;
+          city?: string | null;
+          created_at?: string;
+          id?: string;
+          instagram?: string | null;
+          name: string;
+          niche?: string | null;
+          phone?: string | null;
+          state?: string | null;
+          user_id: string;
+          whatsapp?: string | null;
+        };
         Update: {
-          address?: string | null
-          city?: string | null
-          created_at?: string
-          id?: string
-          instagram?: string | null
-          name?: string
-          niche?: string | null
-          phone?: string | null
-          state?: string | null
-          user_id?: string
-          whatsapp?: string | null
-        }
-        Relationships: []
-      }
+          address?: string | null;
+          city?: string | null;
+          created_at?: string;
+          id?: string;
+          instagram?: string | null;
+          name?: string;
+          niche?: string | null;
+          phone?: string | null;
+          state?: string | null;
+          user_id?: string;
+          whatsapp?: string | null;
+        };
+        Relationships: [];
+      };
       leads: {
         Row: {
-          city: string | null
-          company_id: string | null
-          contact: string | null
-          created_at: string
-          id: string
-          name: string
-          niche: string | null
-          notes: string | null
-          status: string
-          tags: string[] | null
-          updated_at: string
-          user_id: string
-          whatsapp: string | null
-        }
+          city: string | null;
+          company_id: string | null;
+          contact: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          niche: string | null;
+          notes: string | null;
+          status: string;
+          tags: string[] | null;
+          updated_at: string;
+          user_id: string;
+          whatsapp: string | null;
+        };
         Insert: {
-          city?: string | null
-          company_id?: string | null
-          contact?: string | null
-          created_at?: string
-          id?: string
-          name: string
-          niche?: string | null
-          notes?: string | null
-          status?: string
-          tags?: string[] | null
-          updated_at?: string
-          user_id: string
-          whatsapp?: string | null
-        }
+          city?: string | null;
+          company_id?: string | null;
+          contact?: string | null;
+          created_at?: string;
+          id?: string;
+          name: string;
+          niche?: string | null;
+          notes?: string | null;
+          status?: string;
+          tags?: string[] | null;
+          updated_at?: string;
+          user_id: string;
+          whatsapp?: string | null;
+        };
         Update: {
-          city?: string | null
-          company_id?: string | null
-          contact?: string | null
-          created_at?: string
-          id?: string
-          name?: string
-          niche?: string | null
-          notes?: string | null
-          status?: string
-          tags?: string[] | null
-          updated_at?: string
-          user_id?: string
-          whatsapp?: string | null
-        }
+          city?: string | null;
+          company_id?: string | null;
+          contact?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          niche?: string | null;
+          notes?: string | null;
+          status?: string;
+          tags?: string[] | null;
+          updated_at?: string;
+          user_id?: string;
+          whatsapp?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "leads_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
+            foreignKeyName: "leads_company_id_fkey";
+            columns: ["company_id"];
+            isOneToOne: false;
+            referencedRelation: "companies";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       messages: {
         Row: {
-          content: string
-          created_at: string
-          id: string
-          lead_id: string | null
-          sent: boolean | null
-          type: string
-          user_id: string
-        }
+          content: string;
+          created_at: string;
+          id: string;
+          lead_id: string | null;
+          sent: boolean | null;
+          type: string;
+          user_id: string;
+        };
         Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          lead_id?: string | null
-          sent?: boolean | null
-          type: string
-          user_id: string
-        }
+          content: string;
+          created_at?: string;
+          id?: string;
+          lead_id?: string | null;
+          sent?: boolean | null;
+          type: string;
+          user_id: string;
+        };
         Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          lead_id?: string | null
-          sent?: boolean | null
-          type?: string
-          user_id?: string
-        }
+          content?: string;
+          created_at?: string;
+          id?: string;
+          lead_id?: string | null;
+          sent?: boolean | null;
+          type?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "messages_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "leads"
-            referencedColumns: ["id"]
+            foreignKeyName: "messages_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       profiles: {
         Row: {
-          avatar_url: string | null
-          created_at: string
-          email: string | null
-          id: string
-          name: string | null
-        }
+          avatar_url: string | null;
+          created_at: string;
+          email: string | null;
+          id: string;
+          name: string | null;
+        };
         Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          id: string
-          name?: string | null
-        }
+          avatar_url?: string | null;
+          created_at?: string;
+          email?: string | null;
+          id: string;
+          name?: string | null;
+        };
         Update: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          name?: string | null
-        }
-        Relationships: []
-      }
+          avatar_url?: string | null;
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          name?: string | null;
+        };
+        Relationships: [];
+      };
       prompts: {
         Row: {
-          briefing_id: string | null
-          content: string
-          created_at: string
-          id: string
-          title: string
-          user_id: string
-        }
+          briefing_id: string | null;
+          content: string;
+          created_at: string;
+          id: string;
+          title: string;
+          user_id: string;
+        };
         Insert: {
-          briefing_id?: string | null
-          content: string
-          created_at?: string
-          id?: string
-          title: string
-          user_id: string
-        }
+          briefing_id?: string | null;
+          content: string;
+          created_at?: string;
+          id?: string;
+          title: string;
+          user_id: string;
+        };
         Update: {
-          briefing_id?: string | null
-          content?: string
-          created_at?: string
-          id?: string
-          title?: string
-          user_id?: string
-        }
+          briefing_id?: string | null;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          title?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "prompts_briefing_id_fkey"
-            columns: ["briefing_id"]
-            isOneToOne: false
-            referencedRelation: "briefings"
-            referencedColumns: ["id"]
+            foreignKeyName: "prompts_briefing_id_fkey";
+            columns: ["briefing_id"];
+            isOneToOne: false;
+            referencedRelation: "briefings";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
+      generated_sites: {
+        Row: {
+          briefing_id: string | null;
+          created_at: string;
+          files: Json;
+          id: string;
+          preview_html: string;
+          prompt: string;
+          title: string;
+          user_id: string;
+        };
+        Insert: {
+          briefing_id?: string | null;
+          created_at?: string;
+          files: Json;
+          id?: string;
+          preview_html: string;
+          prompt: string;
+          title: string;
+          user_id: string;
+        };
+        Update: {
+          briefing_id?: string | null;
+          created_at?: string;
+          files?: Json;
+          id?: string;
+          preview_html?: string;
+          prompt?: string;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "generated_sites_briefing_id_fkey";
+            columns: ["briefing_id"];
+            isOneToOne: false;
+            referencedRelation: "briefings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       settings: {
         Row: {
-          company_name: string | null
-          logo_url: string | null
-          primary_color: string | null
-          signature: string | null
-          theme: string | null
-          updated_at: string
-          user_id: string
-        }
+          company_name: string | null;
+          logo_url: string | null;
+          primary_color: string | null;
+          signature: string | null;
+          theme: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          company_name?: string | null
-          logo_url?: string | null
-          primary_color?: string | null
-          signature?: string | null
-          theme?: string | null
-          updated_at?: string
-          user_id: string
-        }
+          company_name?: string | null;
+          logo_url?: string | null;
+          primary_color?: string | null;
+          signature?: string | null;
+          theme?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          company_name?: string | null
-          logo_url?: string | null
-          primary_color?: string | null
-          signature?: string | null
-          theme?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          company_name?: string | null;
+          logo_url?: string | null;
+          primary_color?: string | null;
+          signature?: string | null;
+          theme?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       user_roles: {
         Row: {
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
+          id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
         Insert: {
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
+          id?: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
         Update: {
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
-    }
+          id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       has_role: {
         Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-    }
+          _role: Database["public"]["Enums"]["app_role"];
+          _user_id: string;
+        };
+        Returns: boolean;
+      };
+    };
     Enums: {
-      app_role: "admin" | "user"
-    }
+      app_role: "admin" | "user";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["CompositeTypes"] | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
@@ -563,4 +592,4 @@ export const Constants = {
       app_role: ["admin", "user"],
     },
   },
-} as const
+} as const;

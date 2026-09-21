@@ -39,18 +39,33 @@ function ReportsPage() {
   });
 
   function exportCsv() {
-    const csv = toCSV((data?.clients ?? []).map((c) => ({
-      nome: c.name, nicho: c.niche, cidade: c.city,
-      valor: c.project_value, data: c.close_date, status: c.status, dominio: c.domain,
-    })));
+    const csv = toCSV(
+      (data?.clients ?? []).map((c) => ({
+        nome: c.name,
+        nicho: c.niche,
+        cidade: c.city,
+        valor: c.project_value,
+        data: c.close_date,
+        status: c.status,
+        dominio: c.domain,
+      })),
+    );
     downloadFile(`clientes-${new Date().toISOString().slice(0, 10)}.csv`, csv, "text/csv");
   }
   function exportXls() {
     // XML Excel simples
     const headers = ["Nome", "Nicho", "Cidade", "Valor", "Data", "Status"];
-    const body = (data?.clients ?? []).map((c) => [c.name, c.niche, c.city, c.project_value, c.close_date, c.status]);
-    const rowsHtml = [headers, ...body].map((r) =>
-      `<tr>${r.map((v) => `<td>${v ?? ""}</td>`).join("")}</tr>`).join("");
+    const body = (data?.clients ?? []).map((c) => [
+      c.name,
+      c.niche,
+      c.city,
+      c.project_value,
+      c.close_date,
+      c.status,
+    ]);
+    const rowsHtml = [headers, ...body]
+      .map((r) => `<tr>${r.map((v) => `<td>${v ?? ""}</td>`).join("")}</tr>`)
+      .join("");
     const html = `<html><body><table border="1">${rowsHtml}</table></body></html>`;
     downloadFile(`clientes.xls`, html, "application/vnd.ms-excel");
   }
@@ -69,7 +84,7 @@ function ReportsPage() {
       <div class="muted">Gerado em ${new Date().toLocaleString("pt-BR")}</div>
       <p>Total faturado: <b>${brl.format(total)}</b></p>
       <table><thead><tr><th>Nome</th><th>Nicho</th><th>Valor</th><th>Data</th></tr></thead>
-      <tbody>${rows.map((c) => `<tr><td>${c.name}</td><td>${c.niche ?? ""}</td><td>${brl.format(Number(c.project_value||0))}</td><td>${c.close_date ?? ""}</td></tr>`).join("")}</tbody></table>
+      <tbody>${rows.map((c) => `<tr><td>${c.name}</td><td>${c.niche ?? ""}</td><td>${brl.format(Number(c.project_value || 0))}</td><td>${c.close_date ?? ""}</td></tr>`).join("")}</tbody></table>
       </body></html>
     `);
     win.document.close();
@@ -91,9 +106,15 @@ function ReportsPage() {
         description="Exporte dados e visualize a faturação."
         actions={
           <>
-            <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-1" /> CSV</Button>
-            <Button variant="outline" onClick={exportXls}><Download className="h-4 w-4 mr-1" /> XLSX</Button>
-            <Button onClick={exportPdf}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
+            <Button variant="outline" onClick={exportCsv}>
+              <Download className="h-4 w-4 mr-1" /> CSV
+            </Button>
+            <Button variant="outline" onClick={exportXls}>
+              <Download className="h-4 w-4 mr-1" /> XLSX
+            </Button>
+            <Button onClick={exportPdf}>
+              <FileText className="h-4 w-4 mr-1" /> PDF
+            </Button>
           </>
         }
       />
@@ -121,7 +142,11 @@ function ReportsPage() {
               <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
               <YAxis stroke="var(--muted-foreground)" fontSize={12} />
               <Tooltip
-                contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }}
+                contentStyle={{
+                  background: "var(--card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 12,
+                }}
                 formatter={(v: number) => brl.format(v)}
               />
               <Bar dataKey="receita" fill="var(--primary)" radius={[8, 8, 0, 0]} />

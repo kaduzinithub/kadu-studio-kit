@@ -5,155 +5,309 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
-import { generatePrompt, type BriefingLike } from "@/lib/prompt-templates";
+import type { BriefingLike } from "@/lib/prompt-templates";
+import { buildPreviewHtml, type GeneratedSite } from "@/lib/site-generator";
+import { generateSite } from "@/site-generator.functions";
 import { downloadFile } from "@/lib/format";
-import { Copy, Download, RefreshCw, Save } from "lucide-react";
+import { Code2, Download, ExternalLink, Eye, RefreshCw, Save, Sparkles } from "lucide-react";
 import { z } from "zod";
 
 const searchSchema = z.object({ briefing: z.string().optional() });
+const emptyFiles: GeneratedSite["files"] = { "index.html": "", "styles.css": "", "script.js": "" };
+type SiteRow = {
+  id: string;
+  title: string;
+  briefing_id: string | null;
+  files: GeneratedSite["files"];
+  preview_html: string;
+  prompt: string;
+  created_at: string;
+};
 
 export const Route = createFileRoute("/_authenticated/prompts")({
-  head: () => ({ meta: [{ title: "Gerador de Prompt — KaduDev Prompt Engine" }] }),
+  head: () => ({ meta: [{ title: "Sites com IA — KaduDev Prompt Engine" }] }),
   validateSearch: (s) => searchSchema.parse(s),
   component: PromptsPage,
 });
+
+function safeFileName(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "site-kadudev"
+  );
+}
 
 function PromptsPage() {
   const { user } = Route.useRouteContext();
   const { briefing: initialBriefingId } = Route.useSearch();
   const qc = useQueryClient();
   const [selectedBriefing, setSelectedBriefing] = useState<string | undefined>(initialBriefingId);
-  const [content, setContent] = useState("");
-
+  const [activeSite, setActiveSite] = useState<SiteRow | null>(null);
+  const [files, setFiles] = useState<GeneratedSite["files"]>(emptyFiles);
+  const [title, setTitle] = useState("");
   const briefings = useQuery({
     queryKey: ["briefings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("briefings").select("*").order("updated_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("briefings")
+        .select("*")
+        .order("updated_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as (BriefingLike & { id: string; company_name: string })[];
     },
   });
-
-  const history = useQuery({
-    queryKey: ["prompts"],
+  const sites = useQuery({
+    queryKey: ["generated-sites"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("prompts").select("*").order("created_at", { ascending: false }).limit(30);
+      const { data, error } = await supabase
+        .from("generated_sites")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(40);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as unknown as SiteRow[];
     },
   });
-
-  const current = useMemo(
+  const currentBriefing = useMemo(
     () => briefings.data?.find((b) => b.id === selectedBriefing),
     [briefings.data, selectedBriefing],
   );
-
-  function regenerate() {
-    if (!current) return toast.error("Escolha um briefing");
-    const p = generatePrompt(current);
-    setContent(p);
+  const previewHtml = useMemo(() => (files["index.html"] ? buildPreviewHtml(files) : ""), [files]);
+  function loadSite(site: SiteRow) {
+    setActiveSite(site);
+    setSelectedBriefing(site.briefing_id ?? undefined);
+    setTitle(site.title);
+    setFiles(site.files);
   }
-
   useEffect(() => {
-    if (current && !content) setContent(generatePrompt(current));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current]);
+    if (!activeSite && sites.data?.[0]) loadSite(sites.data[0]);
+  }, [sites.data, activeSite]);
 
-  const save = useMutation({
+  const create = useMutation({
     mutationFn: async () => {
-      if (!current) throw new Error("Sem briefing");
-      const { error } = await supabase.from("prompts").insert({
-        user_id: user.id,
-        briefing_id: current.id,
-        title: `Prompt — ${current.company_name}`,
-        content,
-      });
-      if (error) throw error;
+      if (!selectedBriefing) throw new Error("Escolha um briefing antes de criar o site.");
+      return generateSite({ data: { briefingId: selectedBriefing } }) as Promise<SiteRow>;
     },
-    onSuccess: () => {
-      toast.success("Prompt guardado no histórico");
-      qc.invalidateQueries({ queryKey: ["prompts"] });
+    onSuccess: (site) => {
+      loadSite(site);
+      qc.invalidateQueries({ queryKey: ["generated-sites"] });
+      toast.success("Site criado e salvo como uma nova versão.");
     },
-    onError: (e) => toast.error((e as Error).message),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível criar o site."),
   });
-
-  async function copy() {
-    await navigator.clipboard.writeText(content);
-    toast.success("Copiado para a área de transferência");
+  const saveVersion = useMutation({
+    mutationFn: async () => {
+      if (!selectedBriefing || !files["index.html"].trim())
+        throw new Error("Crie ou carregue um site antes de salvar.");
+      const { data, error } = await supabase
+        .from("generated_sites")
+        .insert({
+          user_id: user.id,
+          briefing_id: selectedBriefing,
+          title: title || currentBriefing?.company_name || "Site sem título",
+          prompt: activeSite?.prompt ?? "Edição manual",
+          files,
+          preview_html: previewHtml,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as unknown as SiteRow;
+    },
+    onSuccess: (site) => {
+      loadSite(site);
+      qc.invalidateQueries({ queryKey: ["generated-sites"] });
+      toast.success("Nova versão salva no histórico.");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
+  });
+  function openPreview() {
+    if (!previewHtml) return;
+    const url = URL.createObjectURL(new Blob([previewHtml], { type: "text/html" }));
+    window.open(url, "_blank", "noopener,noreferrer");
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  }
+  function download() {
+    if (!files["index.html"]) return;
+    const base = safeFileName(title || currentBriefing?.company_name || "site-kadudev");
+    downloadFile(`${base}-index.html`, files["index.html"], "text/html;charset=utf-8");
+    downloadFile(`${base}-styles.css`, files["styles.css"], "text/css;charset=utf-8");
+    downloadFile(`${base}-script.js`, files["script.js"], "text/javascript;charset=utf-8");
+    toast.success("Os três arquivos do site foram baixados.");
   }
 
   return (
     <div>
       <PageHeader
-        title="Gerador de Prompt"
-        description="Gere prompts profissionais para Lovable, v0, Claude, Cursor ou Bolt."
+        title="Sites com IA"
+        description="Briefing → site completo → preview → edição → versões."
+        actions={
+          <Button onClick={() => create.mutate()} disabled={!selectedBriefing || create.isPending}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            {create.isPending ? "Criando…" : "Criar site com IA"}
+          </Button>
+        }
       />
-
-      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <div className="space-y-4">
-          <Card className="p-4 space-y-3">
-            <label className="text-xs uppercase text-muted-foreground">Briefing</label>
-            <Select value={selectedBriefing} onValueChange={(v) => { setSelectedBriefing(v); setContent(""); }}>
-              <SelectTrigger><SelectValue placeholder="Escolher briefing" /></SelectTrigger>
+      <div className="grid gap-6 xl:grid-cols-[270px_minmax(0,1fr)]">
+        <aside className="space-y-4">
+          <Card className="space-y-3 p-4">
+            <label className="text-xs uppercase text-muted-foreground">Briefing para gerar</label>
+            <Select value={selectedBriefing} onValueChange={setSelectedBriefing}>
+              <SelectTrigger>
+                <SelectValue placeholder="Escolher briefing" />
+              </SelectTrigger>
               <SelectContent>
                 {(briefings.data ?? []).map((b) => (
-                  <SelectItem key={b.id} value={b.id}>{b.company_name}</SelectItem>
+                  <SelectItem key={b.id} value={b.id}>
+                    {b.company_name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <div className="grid grid-cols-2 gap-2">
-              <Button onClick={regenerate} variant="secondary"><RefreshCw className="h-4 w-4 mr-1" /> Gerar</Button>
-              <Button onClick={() => save.mutate()} disabled={!content}><Save className="h-4 w-4 mr-1" /> Guardar</Button>
-              <Button onClick={copy} disabled={!content} variant="outline"><Copy className="h-4 w-4 mr-1" /> Copiar</Button>
-              <Button
-                onClick={() => downloadFile(`prompt-${current?.company_name || "kadudev"}.txt`, content)}
-                disabled={!content}
-                variant="outline"
-              >
-                <Download className="h-4 w-4 mr-1" /> TXT
-              </Button>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              A geração usa apenas as informações preenchidas neste briefing.
+            </p>
           </Card>
-
-          <Card className="p-4">
-            <h4 className="text-xs uppercase text-muted-foreground mb-2">Histórico</h4>
-            <div className="space-y-1 max-h-[50vh] overflow-y-auto">
-              {(history.data ?? []).map((p) => (
+          <Card className="p-3">
+            <h2 className="px-2 pb-2 text-xs uppercase text-muted-foreground">
+              Histórico de versões
+            </h2>
+            <div className="max-h-[58vh] space-y-1 overflow-y-auto">
+              {(sites.data ?? []).map((site) => (
                 <button
-                  key={p.id}
-                  onClick={() => setContent(p.content as string)}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted"
+                  key={site.id}
+                  onClick={() => loadSite(site)}
+                  className={`w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted ${activeSite?.id === site.id ? "bg-primary/10 text-primary" : ""}`}
                 >
-                  <div className="font-medium truncate">{p.title as string}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(p.created_at as string).toLocaleString("pt-BR")}
-                  </div>
+                  <span className="block truncate font-medium">{site.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(site.created_at).toLocaleString("pt-BR")}
+                  </span>
                 </button>
               ))}
-              {(history.data ?? []).length === 0 && (
-                <p className="text-xs text-muted-foreground px-2 py-4">Sem histórico ainda.</p>
+              {sites.data?.length === 0 && (
+                <p className="px-2 py-4 text-xs text-muted-foreground">Nenhuma versão ainda.</p>
               )}
             </div>
           </Card>
+        </aside>
+        <div className="space-y-5">
+          <Card className="flex flex-wrap items-center gap-2 p-3">
+            <Button
+              variant="secondary"
+              onClick={() => create.mutate()}
+              disabled={!selectedBriefing || create.isPending}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Regenerar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                document.getElementById("site-preview")?.scrollIntoView({ behavior: "smooth" })
+              }
+              disabled={!previewHtml}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Preview
+            </Button>
+            <Button variant="outline" onClick={openPreview} disabled={!previewHtml}>
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Nova aba
+            </Button>
+            <Button variant="outline" onClick={download} disabled={!previewHtml}>
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+            <Button
+              className="ml-auto"
+              onClick={() => saveVersion.mutate()}
+              disabled={saveVersion.isPending || !previewHtml}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Salvar versão
+            </Button>
+          </Card>
+          <Card className="p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Code2 className="h-4 w-4 text-primary" />
+              <input
+                aria-label="Título do site"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Título do site"
+                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none"
+              />
+            </div>
+            <Tabs defaultValue="html">
+              <TabsList>
+                <TabsTrigger value="html">HTML</TabsTrigger>
+                <TabsTrigger value="css">CSS</TabsTrigger>
+                <TabsTrigger value="js">JavaScript</TabsTrigger>
+              </TabsList>
+              <TabsContent value="html">
+                <Editor
+                  value={files["index.html"]}
+                  onChange={(value) => setFiles({ ...files, "index.html": value })}
+                />
+              </TabsContent>
+              <TabsContent value="css">
+                <Editor
+                  value={files["styles.css"]}
+                  onChange={(value) => setFiles({ ...files, "styles.css": value })}
+                />
+              </TabsContent>
+              <TabsContent value="js">
+                <Editor
+                  value={files["script.js"]}
+                  onChange={(value) => setFiles({ ...files, "script.js": value })}
+                />
+              </TabsContent>
+            </Tabs>
+          </Card>
+          <Card id="site-preview" className="overflow-hidden">
+            <div className="border-b border-border px-4 py-3 text-sm font-medium">
+              Preview isolado
+            </div>
+            {previewHtml ? (
+              <iframe
+                title="Preview do site gerado"
+                srcDoc={previewHtml}
+                sandbox="allow-scripts allow-forms allow-popups"
+                className="h-[680px] w-full bg-white"
+              />
+            ) : (
+              <div className="p-14 text-center text-sm text-muted-foreground">
+                Selecione um briefing e crie seu primeiro site.
+              </div>
+            )}
+          </Card>
         </div>
-
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-2 text-xs text-muted-foreground">
-            <span>{current ? `Editando: ${current.company_name}` : "Sem briefing selecionado"}</span>
-            <span>{content.length} caracteres</span>
-          </div>
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            spellCheck={false}
-            className="min-h-[70vh] font-mono text-sm bg-muted/30 leading-relaxed"
-            placeholder="O prompt gerado aparecerá aqui…"
-          />
-        </Card>
       </div>
     </div>
+  );
+}
+
+function Editor({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return (
+    <Textarea
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      spellCheck={false}
+      className="mt-3 min-h-[390px] resize-y bg-muted/30 font-mono text-xs leading-relaxed"
+      placeholder="O código gerado aparecerá aqui…"
+    />
   );
 }

@@ -9,9 +9,12 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const saved = window.localStorage.getItem("kadudev-theme");
-    const nextTheme: Theme = saved === "light" || saved === "dark"
-      ? saved
-      : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    const nextTheme: Theme =
+      saved === "light" || saved === "dark"
+        ? saved
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
     setTheme(nextTheme);
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
   }, []);

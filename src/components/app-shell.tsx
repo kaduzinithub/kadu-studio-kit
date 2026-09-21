@@ -42,7 +42,13 @@ const NAV = [
   { to: "/settings", label: "Configurações", icon: SettingsIcon },
 ] as const;
 
-export function AppShell({ children, user }: { children: ReactNode; user: { email?: string; name?: string } }) {
+export function AppShell({
+  children,
+  user,
+}: {
+  children: ReactNode;
+  user: { email?: string; name?: string };
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -89,7 +95,7 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
                 key={item.to}
                 to={item.to}
                 className={cn(
-                   "nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
+                  "nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground",
@@ -116,7 +122,10 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
 
       {/* Mobile sidebar drawer */}
       {mobileOpen && (
-         <div className="md:hidden fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)}>
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        >
           <div
             className="absolute left-0 top-0 h-full w-64 bg-sidebar border-r border-border p-2"
             onClick={(e) => e.stopPropagation()}
@@ -137,7 +146,9 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium",
-                    active ? "bg-primary/10 text-primary" : "text-sidebar-foreground hover:bg-sidebar-accent",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -151,7 +162,7 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-         <header className="h-20 border-b border-border flex items-center gap-3 px-4 md:px-8 bg-background/75 backdrop-blur-xl sticky top-0 z-20">
+        <header className="h-20 border-b border-border flex items-center gap-3 px-4 md:px-8 bg-background/75 backdrop-blur-xl sticky top-0 z-20">
           <Button
             variant="ghost"
             size="icon"
@@ -162,7 +173,10 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
           </Button>
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-             <Input placeholder="Pesquisar…" className="pl-9 bg-muted/50 border-border/70 rounded-full transition-all duration-300 focus-visible:bg-card" />
+            <Input
+              placeholder="Pesquisar…"
+              className="pl-9 bg-muted/50 border-border/70 rounded-full transition-all duration-300 focus-visible:bg-card"
+            />
           </div>
           <ThemeToggle />
           <Button variant="ghost" size="icon" aria-label="Notificações">
@@ -181,7 +195,9 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="font-medium">{user.name || "Utilizador"}</div>
-                <div className="text-xs text-muted-foreground font-normal truncate">{user.email}</div>
+                <div className="text-xs text-muted-foreground font-normal truncate">
+                  {user.email}
+                </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -193,13 +209,21 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-         <main className="page-enter flex-1 p-4 md:p-8 lg:p-10">{children}</main>
+        <main className="page-enter flex-1 p-4 md:p-8 lg:p-10">{children}</main>
       </div>
     </div>
   );
 }
 
-export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
+export function PageHeader({
+  title,
+  description,
+  actions,
+}: {
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+}) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
       <div>

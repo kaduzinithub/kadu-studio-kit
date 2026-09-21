@@ -9,9 +9,23 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { NICHOS } from "@/lib/prompt-templates";
-import { STATES, ufOf, VISUAL_STYLES, AUDIENCES, GOALS, CTAS, SITE_PAGES } from "@/lib/br-locations";
+import {
+  STATES,
+  ufOf,
+  VISUAL_STYLES,
+  AUDIENCES,
+  GOALS,
+  CTAS,
+  SITE_PAGES,
+} from "@/lib/br-locations";
 import { useIbgeCities } from "@/lib/use-ibge-cities";
 
 export const Route = createFileRoute("/_authenticated/briefings")({
@@ -45,7 +59,12 @@ type Briefing = {
 };
 
 type FieldType = "text" | "textarea" | "color" | "select" | "state" | "city" | "pages";
-const FIELDS: { key: keyof Briefing; label: string; type?: FieldType; options?: readonly string[] }[] = [
+const FIELDS: {
+  key: keyof Briefing;
+  label: string;
+  type?: FieldType;
+  options?: readonly string[];
+}[] = [
   { key: "company_name", label: "Nome da empresa" },
   { key: "niche", label: "Nicho", type: "select", options: NICHOS },
   { key: "state", label: "Estado", type: "state" },
@@ -70,7 +89,10 @@ const FIELDS: { key: keyof Briefing; label: string; type?: FieldType; options?: 
 ];
 
 function splitPages(value: string | null | undefined): { known: string[]; extra: string } {
-  const parts = (value ?? "").split(/[,\n]/).map((p) => p.trim()).filter(Boolean);
+  const parts = (value ?? "")
+    .split(/[,\n]/)
+    .map((p) => p.trim())
+    .filter(Boolean);
   const known = parts.filter((p) => (SITE_PAGES as readonly string[]).includes(p));
   const extra = parts.filter((p) => !(SITE_PAGES as readonly string[]).includes(p)).join(", ");
   return { known, extra };
@@ -87,7 +109,10 @@ function BriefingsPage() {
   const list = useQuery({
     queryKey: ["briefings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("briefings").select("*").order("updated_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("briefings")
+        .select("*")
+        .order("updated_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Briefing[];
     },
@@ -161,9 +186,11 @@ function BriefingsPage() {
             {draft && (
               <Button
                 variant="secondary"
-                onClick={() => navigate({ to: "/prompts", search: { briefing: draft.id } as never })}
+                onClick={() =>
+                  navigate({ to: "/prompts", search: { briefing: draft.id } as never })
+                }
               >
-                Gerar prompt
+                Criar site com IA
               </Button>
             )}
           </>
@@ -181,11 +208,15 @@ function BriefingsPage() {
                 className={`w-full text-left px-3 py-2 rounded-xl text-sm ${selected === b.id ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}
               >
                 <div className="font-medium truncate">{b.company_name}</div>
-                <div className="text-xs text-muted-foreground truncate">{b.niche} · {b.city}</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {b.niche} · {b.city}
+                </div>
               </button>
             ))}
             {(list.data ?? []).length === 0 && (
-              <p className="text-sm text-muted-foreground px-2 py-6 text-center">Nenhum briefing.</p>
+              <p className="text-sm text-muted-foreground px-2 py-6 text-center">
+                Nenhum briefing.
+              </p>
             )}
           </div>
         </Card>
@@ -194,7 +225,10 @@ function BriefingsPage() {
           <Card className="p-6 space-y-5">
             <div className="grid gap-4 md:grid-cols-2">
               {FIELDS.map((f) => (
-                <div key={f.key} className={`space-y-1.5 ${f.type === "textarea" || f.type === "pages" ? "md:col-span-2" : ""}`}>
+                <div
+                  key={f.key}
+                  className={`space-y-1.5 ${f.type === "textarea" || f.type === "pages" ? "md:col-span-2" : ""}`}
+                >
                   <Label className="text-xs">{f.label}</Label>
                   {f.type === "pages" ? (
                     (() => {
@@ -202,7 +236,13 @@ function BriefingsPage() {
                       const setPages = (nextKnown: string[], nextExtra: string) =>
                         setDraft({
                           ...draft,
-                          pages: [...nextKnown, ...nextExtra.split(",").map((s) => s.trim()).filter(Boolean)].join(", "),
+                          pages: [
+                            ...nextKnown,
+                            ...nextExtra
+                              .split(",")
+                              .map((s) => s.trim())
+                              .filter(Boolean),
+                          ].join(", "),
                         });
                       return (
                         <div className="space-y-3">
@@ -213,7 +253,12 @@ function BriefingsPage() {
                                 <button
                                   key={p}
                                   type="button"
-                                  onClick={() => setPages(active ? known.filter((k) => k !== p) : [...known, p], extra)}
+                                  onClick={() =>
+                                    setPages(
+                                      active ? known.filter((k) => k !== p) : [...known, p],
+                                      extra,
+                                    )
+                                  }
                                   className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${active ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:border-primary/50"}`}
                                 >
                                   {p}
@@ -253,9 +298,15 @@ function BriefingsPage() {
                       value={(draft[f.key] as string) ?? ""}
                       onValueChange={(v) => setDraft({ ...draft, [f.key]: v })}
                     >
-                      <SelectTrigger><SelectValue placeholder="Escolher…" /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolher…" />
+                      </SelectTrigger>
                       <SelectContent className="max-h-72">
-                        {(f.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        {(f.options ?? []).map((o) => (
+                          <SelectItem key={o} value={o}>
+                            {o}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   ) : f.type === "state" ? (
@@ -263,9 +314,15 @@ function BriefingsPage() {
                       value={(draft.state as string) ?? ""}
                       onValueChange={(v) => setDraft({ ...draft, state: v, city: "" })}
                     >
-                      <SelectTrigger><SelectValue placeholder="Escolher…" /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolher…" />
+                      </SelectTrigger>
                       <SelectContent className="max-h-72">
-                        {STATES.map((s) => <SelectItem key={s.uf} value={s.name}>{s.name} ({s.uf})</SelectItem>)}
+                        {STATES.map((s) => (
+                          <SelectItem key={s.uf} value={s.name}>
+                            {s.name} ({s.uf})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   ) : f.type === "city" ? (
@@ -275,10 +332,22 @@ function BriefingsPage() {
                       disabled={!draft.state || cities.isLoading}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={!draft.state ? "Escolha o estado primeiro" : cities.isLoading ? "Carregando cidades…" : "Escolher…"} />
+                        <SelectValue
+                          placeholder={
+                            !draft.state
+                              ? "Escolha o estado primeiro"
+                              : cities.isLoading
+                                ? "Carregando cidades…"
+                                : "Escolher…"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent className="max-h-72">
-                        {(cities.data ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        {(cities.data ?? []).map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   ) : (
@@ -293,10 +362,18 @@ function BriefingsPage() {
 
             <div className="flex items-center gap-3 pt-2 border-t border-border">
               <span className="text-xs text-muted-foreground">Preview:</span>
-              <div className="h-8 w-8 rounded-lg border border-border" style={{ background: draft.primary_color || "#d4af37" }} />
-              <div className="h-8 w-8 rounded-lg border border-border" style={{ background: draft.secondary_color || "#111" }} />
+              <div
+                className="h-8 w-8 rounded-lg border border-border"
+                style={{ background: draft.primary_color || "#d4af37" }}
+              />
+              <div
+                className="h-8 w-8 rounded-lg border border-border"
+                style={{ background: draft.secondary_color || "#111" }}
+              />
               <div className="ml-auto flex gap-2">
-                <Button variant="ghost" onClick={() => remove.mutate(draft.id)}>Remover</Button>
+                <Button variant="ghost" onClick={() => remove.mutate(draft.id)}>
+                  Remover
+                </Button>
                 <Button onClick={() => save.mutate(draft)}>Guardar</Button>
               </div>
             </div>
