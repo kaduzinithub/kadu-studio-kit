@@ -468,12 +468,11 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 Além das variáveis Supabase já configuradas, defina no ambiente de servidor:
 
 ```sh
-OPENROUTER_API_KEY=sua_chave_da_openrouter
-AI_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
-AI_FALLBACK_MODELS=poolside/laguna-s-2.1:free,cohere/north-mini-code:free,openrouter/free
+GEMINI_API_KEY=sua_chave_da_gemini
+GEMINI_MODEL=gemini-3.8-flash
 ```
 
-O gerador tenta os modelos em ordem. Se um estiver indisponível, atingir limite ou retornar uma resposta inválida, tenta o próximo automaticamente. Briefings são enviados somente no momento em que o utilizador solicita a geração; a chave OpenRouter jamais é exposta ao navegador.
+O gerador usa o SDK oficial `@google/genai` exclusivamente no servidor. A resposta estruturada é validada antes de persistir os três arquivos, e há um limite básico de quatro gerações por utilizador a cada minuto. Briefings são enviados somente no momento em que o utilizador solicita a geração; a chave Gemini jamais é exposta ao navegador.
 
 Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
@@ -483,4 +482,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
