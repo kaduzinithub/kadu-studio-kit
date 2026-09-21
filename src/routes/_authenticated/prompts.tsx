@@ -17,7 +17,7 @@ import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import type { BriefingLike } from "@/lib/prompt-templates";
 import { buildPreviewHtml, type GeneratedSite } from "@/lib/site-generator";
-import { generateSite } from "@/site-generator.functions";
+import { editGeneratedSite, generateSite } from "@/site-generator.functions";
 import { downloadFile } from "@/lib/format";
 import { Code2, Download, ExternalLink, Eye, RefreshCw, Save, Sparkles } from "lucide-react";
 import { z } from "zod";
@@ -57,6 +57,8 @@ function PromptsPage() {
   const [activeSite, setActiveSite] = useState<SiteRow | null>(null);
   const [files, setFiles] = useState<GeneratedSite["files"]>(emptyFiles);
   const [title, setTitle] = useState("");
+  const [siteRequest, setSiteRequest] = useState("");
+  const [editRequest, setEditRequest] = useState("");
   const briefings = useQuery({
     queryKey: ["briefings"],
     queryFn: async () => {
@@ -98,7 +100,9 @@ function PromptsPage() {
   const create = useMutation({
     mutationFn: async () => {
       if (!selectedBriefing) throw new Error("Escolha um briefing antes de criar o site.");
-      return generateSite({ data: { briefingId: selectedBriefing } }) as Promise<SiteRow>;
+      return generateSite({
+        data: { briefingId: selectedBriefing, request: siteRequest },
+      }) as Promise<SiteRow>;
     },
     onSuccess: (site) => {
       loadSite(site);
@@ -106,6 +110,21 @@ function PromptsPage() {
       toast.success("Site criado e salvo como uma nova versão.");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível criar o site."),
+  });
+  const editWithAi = useMutation({
+    mutationFn: async () => {
+      if (!activeSite) throw new Error("Carregue uma versão antes de pedir uma edição.");
+      return editGeneratedSite({
+        data: { siteId: activeSite.id, request: editRequest },
+      }) as Promise<SiteRow>;
+    },
+    onSuccess: (site) => {
+      loadSite(site);
+      setEditRequest("");
+      qc.invalidateQueries({ queryKey: ["generated-sites"] });
+      toast.success("Edição criada e salva como uma nova versão.");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível editar o site."),
   });
   const saveVersion = useMutation({
     mutationFn: async () => {
@@ -179,6 +198,12 @@ function PromptsPage() {
             <p className="text-xs text-muted-foreground">
               A geração usa apenas as informações preenchidas neste briefing.
             </p>
+            <Textarea
+              value={siteRequest}
+              onChange={(event) => setSiteRequest(event.target.value)}
+              placeholder="Descreva seu site ou acrescente instruções…"
+              className="min-h-28 text-sm"
+            />
           </Card>
           <Card className="p-3">
             <h2 className="px-2 pb-2 text-xs uppercase text-muted-foreground">
@@ -239,6 +264,24 @@ function PromptsPage() {
               <Save className="mr-2 h-4 w-4" />
               Salvar versão
             </Button>
+          </Card>
+          <Card className="space-y-3 p-4">
+            <label className="text-xs uppercase text-muted-foreground">Editar com IA</label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Textarea
+                value={editRequest}
+                onChange={(event) => setEditRequest(event.target.value)}
+                placeholder="Ex.: Deixe o botão principal laranja e aumente o título."
+                className="min-h-20 flex-1 text-sm"
+              />
+              <Button
+                variant="secondary"
+                onClick={() => editWithAi.mutate()}
+                disabled={!activeSite || editRequest.trim().length < 3 || editWithAi.isPending}
+              >
+                {editWithAi.isPending ? "Editando…" : "Aplicar edição"}
+              </Button>
+            </div>
           </Card>
           <Card className="p-4">
             <div className="mb-3 flex items-center gap-2">
