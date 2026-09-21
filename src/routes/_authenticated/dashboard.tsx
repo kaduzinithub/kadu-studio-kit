@@ -89,12 +89,14 @@ function Dashboard() {
   return (
     <div>
       <PageHeader title="Dashboard" description="Visão geral da operação KaduDev Studios." />
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-        {cards.map((c) => (
-          <Card key={c.label} className="p-5 bg-card">
+      <div className="stagger-grid grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+        {cards.map((c, index) => (
+          <Card key={c.label} className="group p-5 bg-card" style={{ animationDelay: `${index * 55}ms` }}>
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">{c.label}</span>
-              <c.icon className="h-4 w-4 text-primary" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                <c.icon className="h-4 w-4 text-primary transition-colors group-hover:text-primary-foreground" />
+              </span>
             </div>
             <div className="text-2xl font-semibold mt-3">{c.value}</div>
           </Card>

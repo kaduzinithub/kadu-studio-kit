@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -60,22 +61,22 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
     .join("");
 
   return (
-    <div className="flex min-h-screen w-full bg-background text-foreground">
+    <div className="app-frame flex min-h-screen w-full bg-background text-foreground">
       {/* Sidebar */}
       <aside
         className={cn(
-          "hidden md:flex flex-col border-r border-border bg-sidebar transition-all duration-300",
+          "hidden md:flex flex-col border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl transition-all duration-500",
           collapsed ? "w-[72px]" : "w-64",
         )}
       >
-        <div className="flex items-center gap-2 px-4 h-16 border-b border-border">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
+        <div className="flex items-center gap-3 px-4 h-20 border-b border-sidebar-border">
+          <div className="brand-mark flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
             K
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold">KaduDev</span>
-              <span className="text-xs text-muted-foreground">Prompt Engine</span>
+              <span className="font-display text-lg font-semibold">KaduDev</span>
+              <span className="text-[10px] uppercase text-muted-foreground">Prompt Engine</span>
             </div>
           )}
         </div>
@@ -88,7 +89,7 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                   "nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground",
@@ -115,7 +116,7 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
 
       {/* Mobile sidebar drawer */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/60" onClick={() => setMobileOpen(false)}>
+         <div className="md:hidden fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)}>
           <div
             className="absolute left-0 top-0 h-full w-64 bg-sidebar border-r border-border p-2"
             onClick={(e) => e.stopPropagation()}
@@ -150,7 +151,7 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b border-border flex items-center gap-3 px-4 md:px-6 bg-background/80 backdrop-blur sticky top-0 z-20">
+         <header className="h-20 border-b border-border flex items-center gap-3 px-4 md:px-8 bg-background/75 backdrop-blur-xl sticky top-0 z-20">
           <Button
             variant="ghost"
             size="icon"
@@ -161,8 +162,9 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
           </Button>
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Pesquisar…" className="pl-9 bg-muted/40 border-border" />
+             <Input placeholder="Pesquisar…" className="pl-9 bg-muted/50 border-border/70 rounded-full transition-all duration-300 focus-visible:bg-card" />
           </div>
+          <ThemeToggle />
           <Button variant="ghost" size="icon" aria-label="Notificações">
             <Bell className="h-5 w-5" />
           </Button>
@@ -191,7 +193,7 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+         <main className="page-enter flex-1 p-4 md:p-8 lg:p-10">{children}</main>
       </div>
     </div>
   );
@@ -199,9 +201,9 @@ export function AppShell({ children, user }: { children: ReactNode; user: { emai
 
 export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+    <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
       <div>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="font-display text-3xl md:text-4xl font-medium italic">{title}</h1>
         {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </div>
       {actions && <div className="flex gap-2">{actions}</div>}
