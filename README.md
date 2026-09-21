@@ -1,6 +1,6 @@
 # Prompt Forge
 
-# KaduDev Prompt Engine — versão definitiva sem API paga
+# KaduDev Prompt Engine
 
 Crie uma plataforma SaaS privada chamada **KaduDev Prompt Engine**. Gere o projeto COMPLETO em uma única execução, sem dividir em etapas, sem pedir confirmação e sem simplificar funcionalidades.
 
@@ -10,19 +10,19 @@ O sistema deve estar pronto para deploy e uso real pela **KaduDev Studios**.
 
 A plataforma serve para:
 
-* pesquisar empresas locais gratuitamente no Google Maps,
-* gerir leads,
-* preencher briefings,
-* gerar prompts profissionais para criação de sites,
-* gerar mensagens comerciais prontas,
-* abrir o WhatsApp automaticamente com a mensagem preenchida,
-* acompanhar vendas e clientes.
+- pesquisar empresas locais gratuitamente no Google Maps,
+- gerir leads,
+- preencher briefings,
+- gerar sites profissionais a partir de briefings com IA,
+- gerar mensagens comerciais prontas,
+- abrir o WhatsApp automaticamente com a mensagem preenchida,
+- acompanhar vendas e clientes.
 
 ### REGRA MAIS IMPORTANTE
 
-**NÃO use Google Places API e NÃO implemente IA geradora de sites.**
+**NÃO use Google Places API.**
 
-O sistema apenas gera PROMPTS para serem copiados e enviados manualmente para ferramentas externas como Lovable, v0, Claude, Cursor Agent ou Bolt.
+O módulo **Sites com IA** usa Groq exclusivamente no servidor para transformar um briefing em `index.html`, `styles.css` e `script.js`. Cada geração e cada salvamento cria uma versão imutável em `generated_sites`; o painel oferece preview isolado, edição por abas e download dos arquivos. A chave `GROQ_API_KEY` jamais é exposta ao navegador.
 
 ---
 
@@ -30,18 +30,18 @@ O sistema apenas gera PROMPTS para serem copiados e enviados manualmente para fe
 
 Use obrigatoriamente:
 
-* React + Vite + TypeScript
-* TailwindCSS
-* shadcn/ui
-* Node.js + Express + TypeScript
-* PostgreSQL (Supabase)
-* Prisma ORM
-* Supabase Auth
-* Zustand
-* React Hook Form + Zod
-* Framer Motion
-* Recharts
-* Lucide React
+- React + Vite + TypeScript
+- TailwindCSS
+- shadcn/ui
+- Node.js + Express + TypeScript
+- PostgreSQL (Supabase)
+- Prisma ORM
+- Supabase Auth
+- Zustand
+- React Hook Form + Zod
+- Framer Motion
+- Recharts
+- Lucide React
 
 ---
 
@@ -51,23 +51,23 @@ Visual **minimalista premium**, semelhante a Linear, Vercel e Notion.
 
 ### Cores
 
-* Fundo: #0a0a0a
-* Superfícies: #111111
-* Cards: #151515
-* Bordas: #232323
-* Texto principal: #f5f5f5
-* Texto secundário: #a1a1aa
-* Destaque: #ff7a00
+- Fundo: #0a0a0a
+- Superfícies: #111111
+- Cards: #151515
+- Bordas: #232323
+- Texto principal: #f5f5f5
+- Texto secundário: #a1a1aa
+- Destaque: #ff7a00
 
 ### Estilo
 
-* muito espaço em branco,
-* tipografia moderna,
-* cantos 20px,
-* sombras suaves,
-* animações leves,
-* sem excesso de neon,
-* totalmente responsivo.
+- muito espaço em branco,
+- tipografia moderna,
+- cantos 20px,
+- sombras suaves,
+- animações leves,
+- sem excesso de neon,
+- totalmente responsivo.
 
 Adicionar logotipo textual **KaduDev Prompt Engine** na sidebar.
 
@@ -75,18 +75,15 @@ Adicionar logotipo textual **KaduDev Prompt Engine** na sidebar.
 
 # SEGURANÇA
 
-* Login obrigatório.
-* Cadastro público desativado.
-* Apenas admin cria utilizadores.
-* Middleware protegendo rotas.
-* Logout.
-* Recuperação de senha.
-* Sessões seguras.
+- Login obrigatório.
+- Cadastro público desativado.
+- Apenas admin cria utilizadores.
+- Middleware protegendo rotas.
+- Logout.
+- Recuperação de senha.
+- Sessões seguras.
 
-Criar utilizador inicial:
-
-* email: [admin@kadudev.local](mailto:admin@kadudev.local)
-* senha: Alterar123!
+Crie o utilizador inicial diretamente no Supabase Auth, usando credenciais fortes e exclusivas do ambiente. Nunca versiona nem publique credenciais de acesso.
 
 ---
 
@@ -94,22 +91,22 @@ Criar utilizador inicial:
 
 ## Sidebar recolhível
 
-* Dashboard
-* Empresas / Maps
-* Leads
-* Briefings
-* Gerador de Prompt
-* Mensagens
-* Clientes
-* Relatórios
-* Configurações
+- Dashboard
+- Empresas / Maps
+- Leads
+- Briefings
+- Gerador de Prompt
+- Mensagens
+- Clientes
+- Relatórios
+- Configurações
 
 ## Topbar
 
-* pesquisa global,
-* notificações,
-* avatar,
-* menu do utilizador.
+- pesquisa global,
+- notificações,
+- avatar,
+- menu do utilizador.
 
 ---
 
@@ -117,18 +114,18 @@ Criar utilizador inicial:
 
 Cards:
 
-* Leads hoje
-* Leads mês
-* Prompts gerados
-* Mensagens enviadas
-* Vendas fechadas
-* Receita mensal
+- Leads hoje
+- Leads mês
+- Prompts gerados
+- Mensagens enviadas
+- Vendas fechadas
+- Receita mensal
 
 Gráficos:
 
-* Leads por dia
-* Conversão por nicho
-* Receita mensal
+- Leads por dia
+- Conversão por nicho
+- Receita mensal
 
 Tabela “Leads recentes”.
 
@@ -138,9 +135,9 @@ Tabela “Leads recentes”.
 
 Criar formulário com:
 
-* Nicho
-* Cidade
-* Estado
+- Nicho
+- Cidade
+- Estado
 
 Ao clicar em **Pesquisar no Maps**, o sistema deve montar automaticamente a URL:
 
@@ -148,9 +145,9 @@ Ao clicar em **Pesquisar no Maps**, o sistema deve montar automaticamente a URL:
 
 Exemplo:
 
-* Nicho: restaurantes
-* Cidade: Belém
-* Estado: Pará
+- Nicho: restaurantes
+- Cidade: Belém
+- Estado: Pará
 
 Resultado:
 https://www.google.com/maps/search/restaurantes+em+Belém+Pará
@@ -162,11 +159,12 @@ https://www.google.com/maps/search/restaurantes+em+Belém+Pará
 3. Botão “Abrir no Google Maps”.
 4. Formulário lateral “Adicionar empresa manualmente” com:
 
-   * nome,
-   * telefone,
-   * WhatsApp,
-   * Instagram,
-   * endereço.
+   - nome,
+   - telefone,
+   - WhatsApp,
+   - Instagram,
+   - endereço.
+
 5. Botão “Adicionar ao pipeline”.
 
 **NÃO use APIs pagas.**
@@ -177,22 +175,22 @@ https://www.google.com/maps/search/restaurantes+em+Belém+Pará
 
 Tabela profissional com:
 
-* pesquisa,
-* filtros,
-* paginação,
-* ordenação,
-* etiquetas,
-* notas.
+- pesquisa,
+- filtros,
+- paginação,
+- ordenação,
+- etiquetas,
+- notas.
 
 Status:
 
-* Novo
-* Contactado
-* Respondeu
-* Reunião
-* Proposta
-* Fechado
-* Perdido
+- Novo
+- Contactado
+- Respondeu
+- Reunião
+- Proposta
+- Fechado
+- Perdido
 
 Adicionar visual Kanban com drag and drop.
 
@@ -202,27 +200,27 @@ Adicionar visual Kanban com drag and drop.
 
 Campos:
 
-* Nome da empresa
-* Nicho
-* Cidade
-* Estado
-* Telefone
-* WhatsApp
-* Instagram
-* E-mail
-* Endereço
-* Cor principal
-* Cor secundária
-* Estilo visual
-* Público-alvo
-* Objetivo do site
-* Páginas desejadas
-* Serviços principais
-* Diferenciais
-* Promoções
-* Horário
-* CTA principal
-* Observações
+- Nome da empresa
+- Nicho
+- Cidade
+- Estado
+- Telefone
+- WhatsApp
+- Instagram
+- E-mail
+- Endereço
+- Cor principal
+- Cor secundária
+- Estilo visual
+- Público-alvo
+- Objetivo do site
+- Páginas desejadas
+- Serviços principais
+- Diferenciais
+- Promoções
+- Horário
+- CTA principal
+- Observações
 
 Salvar automaticamente.
 
@@ -238,40 +236,40 @@ Ao clicar em **Gerar Prompt**, usar TODOS os campos do briefing para produzir um
 
 O prompt deve incluir:
 
-* contexto do negócio,
-* identidade visual,
-* estrutura de páginas,
-* copywriting,
-* SEO local,
-* WhatsApp,
-* mapa,
-* formulário de contacto,
-* responsividade,
-* acessibilidade,
-* performance.
+- contexto do negócio,
+- identidade visual,
+- estrutura de páginas,
+- copywriting,
+- SEO local,
+- WhatsApp,
+- mapa,
+- formulário de contacto,
+- responsividade,
+- acessibilidade,
+- performance.
 
 Criar modelos por nicho:
 
-* Barbearia
-* Restaurante
-* Clínica
-* Academia
-* Loja
-* Hotel
-* Pizzaria
-* Oficina
-* Advogado
-* Dentista
+- Barbearia
+- Restaurante
+- Clínica
+- Academia
+- Loja
+- Hotel
+- Pizzaria
+- Oficina
+- Advogado
+- Dentista
 
 ## Interface
 
-* editor grande estilo IDE,
-* syntax highlight,
-* contador de caracteres,
-* botão Copiar,
-* botão Baixar TXT,
-* botão Regenerar,
-* botão Salvar modelo.
+- editor grande estilo IDE,
+- syntax highlight,
+- contador de caracteres,
+- botão Copiar,
+- botão Baixar TXT,
+- botão Regenerar,
+- botão Salvar modelo.
 
 Salvar histórico automaticamente.
 
@@ -283,18 +281,18 @@ Gerar mensagens comerciais automaticamente.
 
 Tipos:
 
-* WhatsApp inicial,
-* Follow-up 1,
-* Follow-up 2,
-* Instagram DM,
-* E-mail profissional.
+- WhatsApp inicial,
+- Follow-up 1,
+- Follow-up 2,
+- Instagram DM,
+- E-mail profissional.
 
 Usar variáveis:
 
-* {{empresa}}
-* {{cidade}}
-* {{nicho}}
-* {{whatsapp}}
+- {{empresa}}
+- {{cidade}}
+- {{nicho}}
+- {{whatsapp}}
 
 ## FUNCIONALIDADE OBRIGATÓRIA
 
@@ -314,14 +312,14 @@ Adicionar preview da mensagem e botão copiar.
 
 Campos:
 
-* nome,
-* nicho,
-* cidade,
-* valor do projeto,
-* data de fechamento,
-* status,
-* domínio,
-* observações.
+- nome,
+- nicho,
+- cidade,
+- valor do projeto,
+- data de fechamento,
+- status,
+- domínio,
+- observações.
 
 Adicionar timeline de atividades.
 
@@ -331,11 +329,11 @@ Adicionar timeline de atividades.
 
 Implementar:
 
-* exportação PDF,
-* exportação CSV,
-* exportação XLSX,
-* relatório mensal,
-* gráfico de faturação.
+- exportação PDF,
+- exportação CSV,
+- exportação XLSX,
+- relatório mensal,
+- gráfico de faturação.
 
 ---
 
@@ -343,12 +341,12 @@ Implementar:
 
 Permitir:
 
-* alterar logotipo,
-* alterar nome da empresa,
-* alterar cores,
-* assinatura padrão das mensagens,
-* tema claro/escuro,
-* gestão de utilizadores.
+- alterar logotipo,
+- alterar nome da empresa,
+- alterar cores,
+- assinatura padrão das mensagens,
+- tema claro/escuro,
+- gestão de utilizadores.
 
 ---
 
@@ -356,16 +354,16 @@ Permitir:
 
 Criar schema Prisma completo com:
 
-* User
-* Company
-* Lead
-* Briefing
-* Prompt
-* Message
-* Client
-* Deal
-* Activity
-* Settings
+- User
+- Company
+- Lead
+- Briefing
+- Prompt
+- Message
+- Client
+- Deal
+- Activity
+- Settings
 
 Criar migrations e seed com dados fictícios.
 
@@ -375,16 +373,16 @@ Criar migrations e seed com dados fictícios.
 
 Criar rotas REST:
 
-* /auth
-* /companies
-* /leads
-* /briefings
-* /prompts
-* /messages
-* /clients
-* /deals
-* /reports
-* /settings
+- /auth
+- /companies
+- /leads
+- /briefings
+- /prompts
+- /messages
+- /clients
+- /deals
+- /reports
+- /settings
 
 Documentar com Swagger.
 
@@ -394,15 +392,15 @@ Documentar com Swagger.
 
 Implementar:
 
-* skeleton loading,
-* toasts,
-* modais,
-* autosave,
-* atalhos de teclado,
-* estados vazios elegantes,
-* animações suaves,
-* acessibilidade ARIA,
-* tabelas responsivas.
+- skeleton loading,
+- toasts,
+- modais,
+- autosave,
+- atalhos de teclado,
+- estados vazios elegantes,
+- animações suaves,
+- acessibilidade ARIA,
+- tabelas responsivas.
 
 ---
 
@@ -410,12 +408,12 @@ Implementar:
 
 Gerar:
 
-* Dockerfile frontend,
-* Dockerfile backend,
-* docker-compose,
-* .env.example,
-* README completo,
-* scripts npm.
+- Dockerfile frontend,
+- Dockerfile backend,
+- docker-compose,
+- .env.example,
+- README completo,
+- scripts npm.
 
 ---
 
@@ -423,12 +421,12 @@ Gerar:
 
 Tela centralizada minimalista premium com:
 
-* logotipo,
-* título “Entrar no KaduDev Prompt Engine”,
-* e-mail,
-* senha,
-* lembrar sessão,
-* recuperar senha.
+- logotipo,
+- título “Entrar no KaduDev Prompt Engine”,
+- e-mail,
+- senha,
+- lembrar sessão,
+- recuperar senha.
 
 ---
 
@@ -465,6 +463,16 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 
 ## Development
 
+### Variáveis de ambiente
+
+Além das variáveis Supabase já configuradas, defina no ambiente de servidor:
+
+```sh
+GROQ_API_KEY=sua_chave_da_groq
+```
+
+O modelo padrão é `openai/gpt-oss-120b`, via endpoint compatível com OpenAI da Groq. Briefings são enviados somente no momento em que o utilizador solicita a geração.
+
 Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
@@ -473,3 +481,4 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
