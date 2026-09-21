@@ -28,10 +28,10 @@ export const generateSite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator(inputSchema)
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey)
       throw new Error(
-        "A geração de sites não está configurada. Defina GROQ_API_KEY no ambiente do servidor.",
+        "A geração de sites não está configurada. Defina OPENROUTER_API_KEY no ambiente do servidor.",
       );
     const { data: briefing, error: briefingError } = await context.supabase
       .from("briefings")
@@ -40,22 +40,41 @@ export const generateSite = createServerFn({ method: "POST" })
       .single();
     if (briefingError || !briefing)
       throw new Error("Briefing não encontrado ou sem permissão de acesso.");
-    const groq = createOpenAI({ apiKey, baseURL: "https://api.groq.com/openai/v1" });
-    let generated;
-    try {
-      const result = await generateText({
-        model: groq("openai/gpt-oss-120b"),
-        prompt: buildSiteGenerationPrompt(briefing as BriefingLike),
-        temperature: 0.4,
-      });
-      generated = parseGeneratedSite(result.text);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("formato inválido")) throw error;
-      console.error("Groq site generation failed", error);
-      throw new Error(
-        "Não foi possível gerar o site agora. Verifique GROQ_API_KEY e tente novamente.",
-      );
+    const openRouter = createOpenAI({
+      apiKey,
+      baseURL: "https://openrouter.ai/api/v1",
+    });
+    const models = [
+      process.env.AI_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free",
+      ...(
+        process.env.AI_FALLBACK_MODELS ||
+        "poolside/laguna-s-2.1:free,cohere/north-mini-code:free,openrouter/free"
+      )
+        .split(",")
+        .map((model) => model.trim())
+        .filter(Boolean),
+    ];
+    const prompt = buildSiteGenerationPrompt(briefing as BriefingLike);
+    let generated: ReturnType<typeof generatedSiteSchema.parse> | undefined;
+    const failures: string[] = [];
+    for (const model of [...new Set(models)]) {
+      try {
+        const result = await generateText({
+          model: openRouter(model),
+          prompt,
+          temperature: 0.4,
+        });
+        generated = parseGeneratedSite(result.text);
+        break;
+      } catch (error) {
+        console.error(`OpenRouter site generation failed for ${model}`, error);
+        failures.push(model);
+      }
     }
+    if (!generated)
+      throw new Error(
+        `Não foi possível gerar o site com os modelos configurados (${failures.join(", ")}). Tente novamente em alguns minutos.`,
+      );
     const previewHtml = buildPreviewHtml(generated.files);
     const { data: site, error: insertError } = await context.supabase
       .from("generated_sites")
@@ -63,7 +82,7 @@ export const generateSite = createServerFn({ method: "POST" })
         user_id: context.userId,
         briefing_id: data.briefingId,
         title: generated.title,
-        prompt: buildSiteGenerationPrompt(briefing as BriefingLike),
+        prompt,
         files: generated.files,
         preview_html: previewHtml,
       })
@@ -73,3 +92,4 @@ export const generateSite = createServerFn({ method: "POST" })
       throw new Error(`O site foi gerado, mas não pôde ser salvo: ${insertError.message}`);
     return site;
   });
+
