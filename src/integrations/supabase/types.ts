@@ -223,8 +223,10 @@ export type Database = {
           created_at: string
           files: Json
           id: string
+          is_public: boolean
           preview_html: string
           prompt: string
+          share_slug: string
           title: string
           user_id: string
         }
@@ -233,8 +235,10 @@ export type Database = {
           created_at?: string
           files: Json
           id?: string
+          is_public?: boolean
           preview_html: string
           prompt: string
+          share_slug?: string
           title: string
           user_id: string
         }
@@ -243,8 +247,10 @@ export type Database = {
           created_at?: string
           files?: Json
           id?: string
+          is_public?: boolean
           preview_html?: string
           prompt?: string
+          share_slug?: string
           title?: string
           user_id?: string
         }
