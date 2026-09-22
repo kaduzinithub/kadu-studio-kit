@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NICHOS } from "@/lib/prompt-templates";
+import { NICHOS, generatePrompt } from "@/lib/prompt-templates";
 import {
   STATES,
   ufOf,
@@ -148,13 +148,33 @@ function BriefingsPage() {
       const { id, ...rest } = b;
       const { error } = await supabase.from("briefings").update(rest).eq("id", id);
       if (error) throw error;
+
+      // Prompt gerado automaticamente a cada salvamento do briefing.
+      const content = generatePrompt(b);
+      const title = `Prompt — ${b.company_name || "Briefing"}`;
+      const { data: existing } = await supabase
+        .from("prompts")
+        .select("id")
+        .eq("briefing_id", id)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      const { error: promptError } = existing
+        ? await supabase.from("prompts").update({ title, content }).eq("id", existing.id)
+        : await supabase
+            .from("prompts")
+            .insert({ user_id: user.id, briefing_id: id, title, content });
+      if (promptError) throw promptError;
     },
     onSuccess: () => {
-      toast.success("Briefing guardado");
+      toast.success("Briefing guardado e prompt atualizado");
       qc.invalidateQueries({ queryKey: ["briefings"] });
+      qc.invalidateQueries({ queryKey: ["prompts"] });
     },
     onError: (e) => toast.error((e as Error).message),
   });
+
+  const generatedPrompt = useMemo(() => (draft ? generatePrompt(draft) : ""), [draft]);
 
   // Autosave
   useEffect(() => {
@@ -376,6 +396,31 @@ function BriefingsPage() {
                 </Button>
                 <Button onClick={() => save.mutate(draft)}>Guardar</Button>
               </div>
+            </div>
+
+            <div className="space-y-2 border-t border-border pt-4">
+              <div className="flex items-center gap-3">
+                <Label className="text-xs">Prompt gerado automaticamente</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto"
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedPrompt);
+                    toast.success("Prompt copiado");
+                  }}
+                >
+                  Copiar prompt
+                </Button>
+              </div>
+              <Textarea
+                readOnly
+                value={generatedPrompt}
+                className="min-h-56 bg-muted/30 font-mono text-xs leading-relaxed"
+              />
+              <p className="text-xs text-muted-foreground">
+                Atualizado sozinho sempre que o briefing é guardado.
+              </p>
             </div>
           </Card>
         ) : (
