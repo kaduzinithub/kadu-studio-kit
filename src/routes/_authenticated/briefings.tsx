@@ -397,6 +397,31 @@ function BriefingsPage() {
                 <Button onClick={() => save.mutate(draft)}>Guardar</Button>
               </div>
             </div>
+
+            <div className="space-y-2 border-t border-border pt-4">
+              <div className="flex items-center gap-3">
+                <Label className="text-xs">Prompt gerado automaticamente</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto"
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedPrompt);
+                    toast.success("Prompt copiado");
+                  }}
+                >
+                  Copiar prompt
+                </Button>
+              </div>
+              <Textarea
+                readOnly
+                value={generatedPrompt}
+                className="min-h-56 bg-muted/30 font-mono text-xs leading-relaxed"
+              />
+              <p className="text-xs text-muted-foreground">
+                Atualizado sozinho sempre que o briefing é guardado.
+              </p>
+            </div>
           </Card>
         ) : (
           <Card className="p-10 text-center text-muted-foreground">
