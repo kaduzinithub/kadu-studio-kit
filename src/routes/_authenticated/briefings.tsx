@@ -148,13 +148,33 @@ function BriefingsPage() {
       const { id, ...rest } = b;
       const { error } = await supabase.from("briefings").update(rest).eq("id", id);
       if (error) throw error;
+
+      // Prompt gerado automaticamente a cada salvamento do briefing.
+      const content = generatePrompt(b);
+      const title = `Prompt — ${b.company_name || "Briefing"}`;
+      const { data: existing } = await supabase
+        .from("prompts")
+        .select("id")
+        .eq("briefing_id", id)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      const { error: promptError } = existing
+        ? await supabase.from("prompts").update({ title, content }).eq("id", existing.id)
+        : await supabase
+            .from("prompts")
+            .insert({ user_id: user.id, briefing_id: id, title, content });
+      if (promptError) throw promptError;
     },
     onSuccess: () => {
-      toast.success("Briefing guardado");
+      toast.success("Briefing guardado e prompt atualizado");
       qc.invalidateQueries({ queryKey: ["briefings"] });
+      qc.invalidateQueries({ queryKey: ["prompts"] });
     },
     onError: (e) => toast.error((e as Error).message),
   });
+
+  const generatedPrompt = useMemo(() => (draft ? generatePrompt(draft) : ""), [draft]);
 
   // Autosave
   useEffect(() => {
