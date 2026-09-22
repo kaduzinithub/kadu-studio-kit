@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NICHOS } from "@/lib/prompt-templates";
+import { NICHOS, generatePrompt } from "@/lib/prompt-templates";
 import {
   STATES,
   ufOf,
