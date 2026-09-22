@@ -217,6 +217,47 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_sites: {
+        Row: {
+          briefing_id: string | null
+          created_at: string
+          files: Json
+          id: string
+          preview_html: string
+          prompt: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          briefing_id?: string | null
+          created_at?: string
+          files: Json
+          id?: string
+          preview_html: string
+          prompt: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          briefing_id?: string | null
+          created_at?: string
+          files?: Json
+          id?: string
+          preview_html?: string
+          prompt?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_sites_briefing_id_fkey"
+            columns: ["briefing_id"]
+            isOneToOne: false
+            referencedRelation: "briefings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           city: string | null
