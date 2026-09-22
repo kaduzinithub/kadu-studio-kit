@@ -102,7 +102,7 @@ function PromptsPage() {
       if (!selectedBriefing) throw new Error("Escolha um briefing antes de criar o site.");
       return generateSite({
         data: { briefingId: selectedBriefing, request: siteRequest },
-      }) as Promise<SiteRow>;
+      }) as unknown as Promise<SiteRow>;
     },
     onSuccess: (site) => {
       loadSite(site);
@@ -116,7 +116,7 @@ function PromptsPage() {
       if (!activeSite) throw new Error("Carregue uma versão antes de pedir uma edição.");
       return editGeneratedSite({
         data: { siteId: activeSite.id, request: editRequest },
-      }) as Promise<SiteRow>;
+      }) as unknown as Promise<SiteRow>;
     },
     onSuccess: (site) => {
       loadSite(site);
