@@ -34,12 +34,20 @@ function MessagesPage() {
   const qc = useQueryClient();
   const [type, setType] = useState<MessageType>("whatsapp_inicial");
   const [leadId, setLeadId] = useState<string>("manual");
+  const [briefingId, setBriefingId] = useState<string>("nenhum");
   const [empresa, setEmpresa] = useState("");
   const [cidade, setCidade] = useState("");
   const [nicho, setNicho] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [assinatura, setAssinatura] = useState("KaduDev Studios");
+  const [servicos, setServicos] = useState("");
+  const [paginas, setPaginas] = useState("");
+  const [objetivo, setObjetivo] = useState("");
+  const [diferenciais, setDiferenciais] = useState("");
+  const [link, setLink] = useState("");
+  const [origin, setOrigin] = useState("");
   const [content, setContent] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
 
   const leads = useQuery({
     queryKey: ["leads"],
@@ -48,6 +56,31 @@ function MessagesPage() {
         .from("leads")
         .select("id,name,city,niche,whatsapp")
         .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const briefings = useQuery({
+    queryKey: ["briefings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("briefings")
+        .select("*")
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const sites = useQuery({
+    queryKey: ["generated-sites"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("generated_sites")
+        .select("id,title,briefing_id,share_slug,is_public,created_at")
+        .order("created_at", { ascending: false })
+        .limit(40);
       if (error) throw error;
       return data ?? [];
     },
@@ -80,12 +113,53 @@ function MessagesPage() {
     }
   }, [leadId, leads.data]);
 
+  useEffect(() => {
+    if (briefingId === "nenhum") return;
+    const b = briefings.data?.find((x) => x.id === briefingId);
+    if (!b) return;
+    setEmpresa(b.company_name ?? "");
+    setCidade(b.city ?? "");
+    setNicho(b.niche ?? "");
+    setWhatsapp(b.whatsapp ?? b.phone ?? "");
+    setServicos(b.services ?? "");
+    setPaginas(b.pages ?? "");
+    setObjetivo(b.goal ?? "");
+    setDiferenciais(b.differentials ?? "");
+    const site = sites.data?.find((s) => s.briefing_id === b.id && s.is_public);
+    setLink(site && origin ? `${origin}/s/${site.share_slug}` : "");
+  }, [briefingId, briefings.data, sites.data, origin]);
+
   const preview = useMemo(
-    () => renderMessage(type, { empresa, cidade, nicho, whatsapp, assinatura }),
-    [type, empresa, cidade, nicho, whatsapp, assinatura],
+    () =>
+      renderMessage(type, {
+        empresa,
+        cidade,
+        nicho,
+        whatsapp,
+        assinatura,
+        servicos,
+        paginas,
+        objetivo,
+        diferenciais,
+        link,
+      }),
+    [
+      type,
+      empresa,
+      cidade,
+      nicho,
+      whatsapp,
+      assinatura,
+      servicos,
+      paginas,
+      objetivo,
+      diferenciais,
+      link,
+    ],
   );
 
   useEffect(() => setContent(preview), [preview]);
+
 
   const save = useMutation({
     mutationFn: async () => {
