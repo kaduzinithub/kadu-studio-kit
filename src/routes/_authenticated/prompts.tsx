@@ -73,6 +73,9 @@ function PromptsPage() {
   const [title, setTitle] = useState("");
   const [siteRequest, setSiteRequest] = useState("");
   const [editRequest, setEditRequest] = useState("");
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
+
   const briefings = useQuery({
     queryKey: ["briefings"],
     queryFn: async () => {
