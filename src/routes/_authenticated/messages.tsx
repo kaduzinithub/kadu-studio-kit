@@ -199,20 +199,42 @@ function MessagesPage() {
         <Card className="p-6 space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1.5">
-              <Label>Tipo</Label>
+              <Label>Tipo de mensagem</Label>
               <Select value={type} onValueChange={(v) => setType(v as MessageType)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {MESSAGE_TYPES.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.label}
+                  {GROUPS.map((group) => (
+                    <SelectGroup key={group}>
+                      <SelectLabel>{group}</SelectLabel>
+                      {MESSAGE_TYPES.filter((t) => t.group === group).map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Briefing</Label>
+              <Select value={briefingId} onValueChange={setBriefingId}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nenhum">Sem briefing</SelectItem>
+                  {(briefings.data ?? []).map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.company_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-1.5">
               <Label>Lead</Label>
               <Select value={leadId} onValueChange={setLeadId}>
