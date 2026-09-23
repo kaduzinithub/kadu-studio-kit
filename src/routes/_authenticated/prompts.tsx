@@ -19,7 +19,18 @@ import type { BriefingLike } from "@/lib/prompt-templates";
 import { buildPreviewHtml, type GeneratedSite } from "@/lib/site-generator";
 import { editGeneratedSite, generateSite } from "@/site-generator.functions";
 import { downloadFile } from "@/lib/format";
-import { Code2, Download, ExternalLink, Eye, RefreshCw, Save, Sparkles } from "lucide-react";
+import {
+  Code2,
+  Download,
+  ExternalLink,
+  Eye,
+  Link2,
+  MessageCircle,
+  RefreshCw,
+  Save,
+  Sparkles,
+} from "lucide-react";
+
 import { z } from "zod";
 
 const searchSchema = z.object({ briefing: z.string().optional() });
@@ -32,7 +43,10 @@ type SiteRow = {
   preview_html: string;
   prompt: string;
   created_at: string;
+  share_slug: string;
+  is_public: boolean;
 };
+
 
 export const Route = createFileRoute("/_authenticated/prompts")({
   head: () => ({ meta: [{ title: "Sites com IA — KaduDev Prompt Engine" }] }),
