@@ -331,6 +331,58 @@ function PromptsPage() {
               </Button>
             </div>
           </Card>
+          <Card className="space-y-3 p-4">
+            <label className="text-xs uppercase text-muted-foreground">Link para enviar</label>
+            {activeSite ? (
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant={activeSite.is_public ? "outline" : "default"}
+                    onClick={() => publish.mutate(!activeSite.is_public)}
+                    disabled={publish.isPending}
+                  >
+                    <Link2 className="mr-2 h-4 w-4" />
+                    {activeSite.is_public ? "Desativar link" : "Ativar link público"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={copyShareLink}
+                    disabled={!activeSite.is_public || !shareUrl}
+                  >
+                    Copiar link
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={sendOnWhatsapp}
+                    disabled={!activeSite.is_public || !shareUrl}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Enviar no WhatsApp
+                  </Button>
+                  {activeSite.is_public && shareUrl && (
+                    <a
+                      href={shareUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary underline underline-offset-4"
+                    >
+                      Abrir página pública
+                    </a>
+                  )}
+                </div>
+                <p className="break-all rounded-lg bg-muted/30 px-3 py-2 font-mono text-xs text-muted-foreground">
+                  {activeSite.is_public
+                    ? shareUrl || "A preparar o link…"
+                    : "Ative o link para que o cliente consiga ver este site."}
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Crie ou carregue uma versão para gerar o link de partilha.
+              </p>
+            )}
+          </Card>
+
           <Card className="p-4">
             <div className="mb-3 flex items-center gap-2">
               <Code2 className="h-4 w-4 text-primary" />
