@@ -157,7 +157,7 @@ Se o site precisar de uma renovação — visual novo, mais páginas ou promoç�
 function cleanUpLines(text: string): string {
   return text
     .split("\n")
-    .filter((line) => !/^[•\-\d.\s]*[^:]{1,40}:\s*$/.test(line.trim()) || line.trim() === "")
+    .filter((line) => !/^•\s*[^:]+:\s*$/.test(line.trim()))
     .join("\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
