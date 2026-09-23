@@ -166,6 +166,37 @@ function PromptsPage() {
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
   });
+  const publish = useMutation({
+    mutationFn: async (makePublic: boolean) => {
+      if (!activeSite) throw new Error("Carregue uma versão antes de gerar o link.");
+      const { data, error } = await supabase
+        .from("generated_sites")
+        .update({ is_public: makePublic, preview_html: previewHtml })
+        .eq("id", activeSite.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as unknown as SiteRow;
+    },
+    onSuccess: (site) => {
+      setActiveSite(site);
+      qc.invalidateQueries({ queryKey: ["generated-sites"] });
+      toast.success(site.is_public ? "Link público ativado." : "Link desativado.");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível publicar."),
+  });
+  const shareUrl = activeSite && origin ? `${origin}/s/${activeSite.share_slug}` : "";
+  async function copyShareLink() {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    toast.success("Link copiado. É só enviar ao cliente.");
+  }
+  function sendOnWhatsapp() {
+    if (!shareUrl) return;
+    const text = `Olá! Preparei uma prévia do site: ${activeSite?.title ?? ""}\n${shareUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  }
+
   function openPreview() {
     if (!previewHtml) return;
     const url = URL.createObjectURL(new Blob([previewHtml], { type: "text/html" }));
