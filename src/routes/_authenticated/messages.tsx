@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -24,10 +26,13 @@ import {
 } from "@/lib/message-templates";
 import { Copy, Send } from "lucide-react";
 
+const GROUPS = Array.from(new Set(MESSAGE_TYPES.map((t) => t.group)));
+
 export const Route = createFileRoute("/_authenticated/messages")({
   head: () => ({ meta: [{ title: "Mensagens — KaduDev Prompt Engine" }] }),
   component: MessagesPage,
 });
+
 
 function MessagesPage() {
   const { user } = Route.useRouteContext();
