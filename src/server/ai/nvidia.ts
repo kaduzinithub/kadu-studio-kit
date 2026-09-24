@@ -2,7 +2,7 @@ import { generatedProjectSchema, type GeneratedProject } from "./schemas";
 import type { AIProvider, EditSiteInput, GenerateSiteInput } from "./types";
 
 const NIM_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const DEFAULT_MODEL = "deepseek-ai/deepseek-v4.1-flash";
+const DEFAULT_MODEL = "z-ai/glm-5-3-flash";
 
 const SYSTEM = `Você é um web designer sênior. Responda APENAS com um objeto JSON válido, sem markdown, sem texto extra, no formato:
 {"projectName":"kebab-case","title":"Título","files":[{"path":"index.html","content":"..."},{"path":"styles.css","content":"..."},{"path":"script.js","content":"..."}]}
