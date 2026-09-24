@@ -276,11 +276,20 @@ function MessagesPage() {
                 placeholder="5591999999999"
               />
             </div>
-            <div className="space-y-1.5 md:col-span-2">
+            <div className="space-y-1.5">
               <Label>Assinatura</Label>
               <Input value={assinatura} onChange={(e) => setAssinatura(e.target.value)} />
             </div>
+            <div className="space-y-1.5">
+              <Label>Link do site</Label>
+              <Input
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="Ative o link em Sites com IA"
+              />
+            </div>
           </div>
+
           <div className="flex flex-wrap gap-2">
             <Button onClick={openWhatsApp} className="gap-2">
               <Send className="h-4 w-4" /> Enviar no WhatsApp
