@@ -13,7 +13,9 @@ import {
   Bell,
   LogOut,
   Menu,
+  ShieldCheck,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,8 @@ const NAV = [
   { to: "/settings", label: "Configurações", icon: SettingsIcon },
 ] as const;
 
+const ADMIN_ITEM = { to: "/admin", label: "Admin · Acessos", icon: ShieldCheck } as const;
+
 export function AppShell({
   children,
   user,
@@ -53,6 +57,22 @@ export function AppShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const isAdmin = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return false;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      return !!data;
+    },
+    staleTime: 5 * 60 * 1000,
+  }).data;
+  const nav: Array<(typeof NAV)[number] | typeof ADMIN_ITEM> = isAdmin ? [...NAV, ADMIN_ITEM] : [...NAV];
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -87,7 +107,7 @@ export function AppShell({
           )}
         </div>
         <nav className="flex-1 px-2 py-4 space-y-1">
-          {NAV.map((item) => {
+          {nav.map((item) => {
             const active = pathname === item.to || pathname.startsWith(item.to + "/");
             const Icon = item.icon;
             return (
@@ -136,7 +156,7 @@ export function AppShell({
               </div>
               <span className="text-sm font-semibold">KaduDev Prompt Engine</span>
             </div>
-            {NAV.map((item) => {
+            {nav.map((item) => {
               const Icon = item.icon;
               const active = pathname === item.to;
               return (
