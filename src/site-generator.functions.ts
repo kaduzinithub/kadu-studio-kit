@@ -21,6 +21,8 @@ export const generateSite = createServerFn({ method: "POST" })
   .validator(inputSchema)
   .handler(async ({ data, context }) => {
     enforceAiRateLimit(context.userId);
+    const { data: active } = await context.supabase.rpc("has_active_access", { _user_id: context.userId });
+    if (!active) throw new Error("O seu acesso venceu. Fale com o administrador para renovar.");
     const { data: briefing, error: briefingError } = await context.supabase
       .from("briefings")
       .select("*")
@@ -56,6 +58,8 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
   .validator(editSchema)
   .handler(async ({ data, context }) => {
     enforceAiRateLimit(context.userId);
+    const { data: active } = await context.supabase.rpc("has_active_access", { _user_id: context.userId });
+    if (!active) throw new Error("O seu acesso venceu. Fale com o administrador para renovar.");
     const { data: current, error } = await context.supabase
       .from("generated_sites")
       .select("*")
