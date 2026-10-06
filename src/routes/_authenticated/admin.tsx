@@ -16,7 +16,13 @@ import {
   resetAccessPassword,
   setAccessBlocked,
   deleteAccess,
+  setAccessPlan,
 } from "@/lib/admin.functions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type Plan = "1m" | "3m" | "1y" | "lifetime";
+const PLAN_LABEL: Record<Plan, string> = { "1m": "1 mês", "3m": "3 meses", "1y": "1 ano", lifetime: "Vitalício" };
+const PLAN_KEYS = Object.keys(PLAN_LABEL) as Plan[];
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -41,6 +47,8 @@ function AdminPage() {
   const reset = useServerFn(resetAccessPassword);
   const block = useServerFn(setAccessBlocked);
   const del = useServerFn(deleteAccess);
+  const savePlan = useServerFn(setAccessPlan);
+  const [plan, setPlan] = useState<Plan>("1m");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -51,7 +59,7 @@ function AdminPage() {
   const onErr = (e: Error) => toast.error(e.message);
 
   const mCreate = useMutation({
-    mutationFn: () => create({ data: { name, email } }),
+    mutationFn: () => create({ data: { name, email, plan } }),
     onSuccess: (c) => {
       setCred(c);
       setName("");
@@ -72,6 +80,14 @@ function AdminPage() {
   const mBlock = useMutation({
     mutationFn: (v: { id: string; blocked: boolean }) => block({ data: v }),
     onSuccess: () => refresh(),
+    onError: onErr,
+  });
+  const mPlan = useMutation({
+    mutationFn: (v: { id: string; plan: Plan }) => savePlan({ data: v }),
+    onSuccess: () => {
+      toast.success("Validade atualizada");
+      refresh();
+    },
     onError: onErr,
   });
   const mDel = useMutation({
@@ -113,6 +129,17 @@ function AdminPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Deixe vazio para gerar um automaticamente"
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Validade do acesso</Label>
+            <Select value={plan} onValueChange={(v) => setPlan(v as Plan)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PLAN_KEYS.map((k) => (
+                  <SelectItem key={k} value={k}>{PLAN_LABEL[k]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Button
             className="w-full"
@@ -161,13 +188,27 @@ function AdminPage() {
       <Card className="p-0 overflow-hidden">
         <div className="divide-y divide-border">
           {users.isLoading && <div className="p-6 text-sm text-muted-foreground">A carregar…</div>}
-          {users.data?.map((u) => (
+          {users.data?.length === 0 && (
+            <div className="p-6 text-sm text-muted-foreground">Nenhum acesso liberado ainda.</div>
+          )}
+          {users.data?.map((u) => {
+            const expired = !!u.expires_at && new Date(u.expires_at) < new Date();
+            return (
             <div key={u.id} className="flex flex-wrap items-center gap-3 p-4">
               <div className="flex-1 min-w-[200px]">
                 <div className="font-medium flex items-center gap-2">
                   {u.name || u.email.split("@")[0]}
                   {u.is_admin && <Badge>Admin</Badge>}
                   {u.banned && <Badge variant="destructive">Bloqueado</Badge>}
+                  {expired ? (
+                    <Badge variant="destructive">Vencido</Badge>
+                  ) : (
+                    <Badge variant="secondary">
+                      {u.expires_at
+                        ? `Vence ${new Date(u.expires_at).toLocaleDateString("pt-BR")}`
+                        : "Vitalício"}
+                    </Badge>
+                  )}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {u.email} · criado {new Date(u.created_at).toLocaleDateString("pt-BR")}
@@ -177,7 +218,19 @@ function AdminPage() {
                 </div>
               </div>
               {!u.is_admin && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                  <Select onValueChange={(v) => mPlan.mutate({ id: u.id, plan: v as Plan })}>
+                    <SelectTrigger className="h-9 w-[150px]">
+                      <SelectValue placeholder="Renovar…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PLAN_KEYS.map((k) => (
+                        <SelectItem key={k} value={k}>
+                          {k === "lifetime" ? "Vitalício" : `+ ${PLAN_LABEL[k]} (a partir de hoje)`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button size="sm" variant="outline" onClick={() => mReset.mutate(u.id)} title="Nova senha">
                     <KeyRound className="h-4 w-4" />
                   </Button>
@@ -203,7 +256,8 @@ function AdminPage() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
     </div>

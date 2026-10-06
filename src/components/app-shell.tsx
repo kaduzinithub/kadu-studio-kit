@@ -72,6 +72,21 @@ export function AppShell({
     },
     staleTime: 5 * 60 * 1000,
   }).data;
+  const access = useQuery({
+    queryKey: ["my-access"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase
+        .from("access_plans")
+        .select("expires_at")
+        .eq("user_id", u.user.id)
+        .maybeSingle();
+      return data?.expires_at ?? null;
+    },
+    staleTime: 60 * 1000,
+  }).data;
+  const expired = isAdmin === false && !!access && new Date(access) < new Date();
   const nav: Array<(typeof NAV)[number] | typeof ADMIN_ITEM> = isAdmin ? [...NAV, ADMIN_ITEM] : [...NAV];
 
   async function signOut() {
@@ -85,6 +100,21 @@ export function AppShell({
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase())
     .join("");
+
+  if (expired) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
+        <div className="luxury-card max-w-md rounded-[20px] border border-border bg-card p-8 text-center space-y-4">
+          <h1 className="font-display text-3xl italic">Acesso vencido</h1>
+          <p className="text-sm text-muted-foreground">
+            O seu acesso terminou em {new Date(access!).toLocaleDateString("pt-BR")}. Fale com o
+            administrador para renovar.
+          </p>
+          <Button onClick={signOut}>Sair</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-frame flex min-h-screen w-full bg-background text-foreground">
