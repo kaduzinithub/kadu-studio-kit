@@ -21,6 +21,17 @@ function genPassword(len = 12) {
   return out;
 }
 
+const PLANS = ["1m", "3m", "1y", "lifetime"] as const;
+const planSchema = z.enum(PLANS);
+function expiryFor(plan: (typeof PLANS)[number]): string | null {
+  if (plan === "lifetime") return null;
+  const d = new Date();
+  if (plan === "1m") d.setMonth(d.getMonth() + 1);
+  if (plan === "3m") d.setMonth(d.getMonth() + 3);
+  if (plan === "1y") d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString();
+}
+
 function slugify(s: string) {
   return s
     .normalize("NFD")
@@ -40,7 +51,11 @@ export const listAccesses = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role");
     const admins = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
-    return data.users.map((u) => ({
+    const { data: plans } = await supabaseAdmin.from("access_plans").select("user_id, plan, expires_at");
+    const planMap = new Map((plans ?? []).map((p) => [p.user_id, p]));
+    return data.users.filter((u) => !admins.has(u.id)).map((u) => ({
+      plan: planMap.get(u.id)?.plan ?? "lifetime",
+      expires_at: planMap.get(u.id)?.expires_at ?? null,
       id: u.id,
       email: u.email ?? "",
       name: (u.user_metadata?.name as string) ?? "",
@@ -54,7 +69,7 @@ export const listAccesses = createServerFn({ method: "GET" })
 export const createAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({ name: z.string().trim().min(2).max(80), email: z.string().trim().email().max(120).optional().or(z.literal("")) }).parse(d),
+    z.object({ name: z.string().trim().min(2).max(80), email: z.string().trim().email().max(120).optional().or(z.literal("")), plan: planSchema }).parse(d),
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context as Ctx);
@@ -64,14 +79,35 @@ export const createAccess = createServerFn({ method: "POST" })
         ? data.email.toLowerCase()
         : `${slugify(data.name) || "cliente"}.${genPassword(4).toLowerCase()}@kadudev.app`;
     const password = genPassword(12);
-    const { error } = await supabaseAdmin.auth.admin.createUser({
+    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: { name: data.name },
     });
     if (error) throw new Error(error.message.includes("already") ? "Este email já tem acesso." : error.message);
+    await supabaseAdmin.from("access_plans").upsert({
+      user_id: created.user.id,
+      plan: data.plan,
+      expires_at: expiryFor(data.plan),
+    });
     return { email, password };
+  });
+
+export const setAccessPlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid(), plan: planSchema }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context as Ctx);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("access_plans").upsert({
+      user_id: data.id,
+      plan: data.plan,
+      expires_at: expiryFor(data.plan),
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const resetAccessPassword = createServerFn({ method: "POST" })

@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_plans: {
+        Row: {
+          expires_at: string | null
+          plan: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          plan?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          plan?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       activities: {
         Row: {
           client_id: string | null
