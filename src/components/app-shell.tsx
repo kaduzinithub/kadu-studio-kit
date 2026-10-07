@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  Wallet,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
@@ -44,7 +45,10 @@ const NAV = [
   { to: "/settings", label: "Configurações", icon: SettingsIcon },
 ] as const;
 
-const ADMIN_ITEM = { to: "/admin", label: "Admin · Acessos", icon: ShieldCheck } as const;
+const ADMIN_ITEMS = [
+  { to: "/admin", label: "Admin · Acessos", icon: ShieldCheck },
+  { to: "/admin-vendas", label: "Admin · Vendas", icon: Wallet },
+] as const;
 
 export function AppShell({
   children,
@@ -87,7 +91,7 @@ export function AppShell({
     staleTime: 60 * 1000,
   }).data;
   const expired = isAdmin === false && !!access && new Date(access) < new Date();
-  const nav: Array<(typeof NAV)[number] | typeof ADMIN_ITEM> = isAdmin ? [...NAV, ADMIN_ITEM] : [...NAV];
+  const nav: Array<(typeof NAV)[number] | (typeof ADMIN_ITEMS)[number]> = isAdmin ? [...NAV, ...ADMIN_ITEMS] : [...NAV];
 
   async function signOut() {
     await supabase.auth.signOut();

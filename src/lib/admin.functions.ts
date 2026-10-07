@@ -51,11 +51,13 @@ export const listAccesses = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role");
     const admins = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
-    const { data: plans } = await supabaseAdmin.from("access_plans").select("user_id, plan, expires_at");
+    const { data: plans } = await supabaseAdmin.from("access_plans").select("user_id, plan, expires_at, whatsapp, last_charged_at");
     const planMap = new Map((plans ?? []).map((p) => [p.user_id, p]));
     return data.users.filter((u) => !admins.has(u.id)).map((u) => ({
       plan: planMap.get(u.id)?.plan ?? "lifetime",
       expires_at: planMap.get(u.id)?.expires_at ?? null,
+      whatsapp: planMap.get(u.id)?.whatsapp ?? "",
+      last_charged_at: planMap.get(u.id)?.last_charged_at ?? null,
       id: u.id,
       email: u.email ?? "",
       name: (u.user_metadata?.name as string) ?? "",
@@ -144,6 +146,35 @@ export const deleteAccess = createServerFn({ method: "POST" })
     if (data.id === (context as Ctx).userId) throw new Error("Não pode apagar a sua própria conta.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateAccessContact = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        whatsapp: z.string().trim().max(20).regex(/^[0-9+()\s-]*$/).optional(),
+        charged: z.boolean().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context as Ctx);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: existing } = await supabaseAdmin
+      .from("access_plans")
+      .select("user_id")
+      .eq("user_id", data.id)
+      .maybeSingle();
+    const patch: { whatsapp?: string; last_charged_at?: string } = {};
+    if (data.whatsapp !== undefined) patch.whatsapp = data.whatsapp.replace(/\D/g, "");
+    if (data.charged) patch.last_charged_at = new Date().toISOString();
+    const { error } = existing
+      ? await supabaseAdmin.from("access_plans").update(patch).eq("user_id", data.id)
+      : await supabaseAdmin.from("access_plans").insert({ user_id: data.id, plan: "lifetime", ...patch });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
