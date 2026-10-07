@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminVendasRouteImport } from './routes/_authenticated/admin-vendas'
 import { Route as AuthenticatedBriefingsRouteImport } from './routes/_authenticated/briefings'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
@@ -49,6 +50,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminVendasRoute =
+  AuthenticatedAdminVendasRouteImport.update({
+    id: '/admin-vendas',
+    path: '/admin-vendas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBriefingsRoute = AuthenticatedBriefingsRouteImport.update({
   id: '/briefings',
   path: '/briefings',
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/admin-vendas': typeof AuthenticatedAdminVendasRoute
   '/briefings': typeof AuthenticatedBriefingsRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
@@ -121,6 +129,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/admin-vendas': typeof AuthenticatedAdminVendasRoute
   '/briefings': typeof AuthenticatedBriefingsRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
@@ -139,6 +148,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin-vendas': typeof AuthenticatedAdminVendasRoute
   '/_authenticated/briefings': typeof AuthenticatedBriefingsRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/admin'
+    | '/admin-vendas'
     | '/briefings'
     | '/clients'
     | '/companies'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/admin'
+    | '/admin-vendas'
     | '/briefings'
     | '/clients'
     | '/companies'
@@ -190,6 +202,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/_authenticated/admin-vendas'
     | '/_authenticated/briefings'
     | '/_authenticated/clients'
     | '/_authenticated/companies'
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-vendas': {
+      id: '/_authenticated/admin-vendas'
+      path: '/admin-vendas'
+      fullPath: '/admin-vendas'
+      preLoaderRoute: typeof AuthenticatedAdminVendasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/briefings': {
@@ -322,6 +342,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminVendasRoute: typeof AuthenticatedAdminVendasRoute
   AuthenticatedBriefingsRoute: typeof AuthenticatedBriefingsRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
@@ -335,6 +356,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminVendasRoute: AuthenticatedAdminVendasRoute,
   AuthenticatedBriefingsRoute: AuthenticatedBriefingsRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
