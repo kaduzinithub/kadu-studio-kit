@@ -84,7 +84,8 @@ function SalesPage() {
 
   function charge(u: (typeof rows)[number]) {
     const name = u.name || u.email.split("@")[0];
-    const phone = (phones[u.id] ?? u.whatsapp ?? "").replace(/\D/g, "");
+    let phone = (phones[u.id] ?? u.whatsapp ?? "").replace(/\D/g, "");
+    if (phone.length === 10 || phone.length === 11) phone = `55${phone}`;
     const text = encodeURIComponent(chargeText(name, u.expires_at));
     window.open(phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`, "_blank");
     mUpdate.mutate({ id: u.id, charged: true });
