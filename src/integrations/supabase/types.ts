@@ -19,6 +19,7 @@ export type Database = {
           expires_at: string | null
           last_charged_at: string | null
           plan: string
+          price_paid: number | null
           updated_at: string
           user_id: string
           whatsapp: string | null
@@ -27,6 +28,7 @@ export type Database = {
           expires_at?: string | null
           last_charged_at?: string | null
           plan?: string
+          price_paid?: number | null
           updated_at?: string
           user_id: string
           whatsapp?: string | null
@@ -35,6 +37,7 @@ export type Database = {
           expires_at?: string | null
           last_charged_at?: string | null
           plan?: string
+          price_paid?: number | null
           updated_at?: string
           user_id?: string
           whatsapp?: string | null
@@ -384,6 +387,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plan_prices: {
+        Row: {
+          plan: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          plan: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          plan?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/app-shell";
 import { listAccesses, updateAccessContact } from "@/lib/admin.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin-vendas")({
   head: () => ({
@@ -49,6 +51,14 @@ function SalesPage() {
 
   const users = useQuery({ queryKey: ["admin-accesses"], queryFn: () => list() });
   const rows = users.data ?? [];
+  const prices = useQuery({
+    queryKey: ["plan-prices"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("plan_prices").select("plan, price");
+      if (error) throw error;
+      return Object.fromEntries((data ?? []).map((p) => [p.plan, Number(p.price)])) as Record<string, number>;
+    },
+  }).data ?? {};
 
   const mUpdate = useMutation({
     mutationFn: (v: { id: string; whatsapp?: string; charged?: boolean }) => update({ data: v }),
@@ -58,8 +68,9 @@ function SalesPage() {
 
   const stats = useMemo(() => {
     const byPlan: Record<string, number> = { "1m": 0, "3m": 0, "1y": 0, lifetime: 0 };
-    let active = 0, soon = 0, expired = 0;
+    let active = 0, soon = 0, expired = 0, revenue = 0;
     for (const u of rows) {
+      revenue += u.price_paid != null ? Number(u.price_paid) : (prices[u.plan] ?? 0);
       byPlan[u.plan] = (byPlan[u.plan] ?? 0) + 1;
       const d = daysLeft(u.expires_at);
       if (d !== null && d < 0) expired++;
@@ -68,8 +79,8 @@ function SalesPage() {
         if (d !== null && d <= 7) soon++;
       }
     }
-    return { total: rows.length, active, soon, expired, byPlan };
-  }, [rows]);
+    return { total: rows.length, active, soon, expired, byPlan, revenue };
+  }, [rows, prices]);
 
   const sorted = useMemo(() => {
     const f = rows.filter((u) => {
@@ -99,8 +110,9 @@ function SalesPage() {
         <Card className="p-6 mb-6 text-sm text-destructive">{(users.error as Error).message}</Card>
       ) : null}
 
-      <div className="stagger-grid grid gap-4 grid-cols-2 md:grid-cols-4 mb-4">
+      <div className="stagger-grid grid gap-4 grid-cols-2 md:grid-cols-5 mb-4">
         {[
+          { l: "Total faturado", v: brl.format(stats.revenue) },
           { l: "Acessos vendidos", v: stats.total },
           { l: "Ativos", v: stats.active },
           { l: "Vencem em 7 dias", v: stats.soon },

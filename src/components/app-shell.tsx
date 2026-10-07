@@ -15,6 +15,7 @@ import {
   Menu,
   ShieldCheck,
   Wallet,
+  Tag,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
@@ -48,6 +49,7 @@ const NAV = [
 const ADMIN_ITEMS = [
   { to: "/admin", label: "Admin · Acessos", icon: ShieldCheck },
   { to: "/admin-vendas", label: "Admin · Vendas", icon: Wallet },
+  { to: "/admin-precos", label: "Admin · Preços", icon: Tag },
 ] as const;
 
 export function AppShell({
