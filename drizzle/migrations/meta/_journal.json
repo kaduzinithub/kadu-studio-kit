@@ -36,6 +36,13 @@
       "when": 1791410786350,
       "tag": "0004_access_plans_whatsapp",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791410975747,
+      "tag": "0005_plan_prices",
+      "breakpoints": true
     }
   ]
 }
