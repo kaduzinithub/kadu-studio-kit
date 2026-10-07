@@ -32,6 +32,11 @@ function expiryFor(plan: (typeof PLANS)[number]): string | null {
   return d.toISOString();
 }
 
+async function priceOf(admin: any, plan: string): Promise<number> {
+  const { data } = await admin.from("plan_prices").select("price").eq("plan", plan).maybeSingle();
+  return Number(data?.price ?? 0);
+}
+
 function slugify(s: string) {
   return s
     .normalize("NFD")
@@ -51,13 +56,14 @@ export const listAccesses = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role");
     const admins = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
-    const { data: plans } = await supabaseAdmin.from("access_plans").select("user_id, plan, expires_at, whatsapp, last_charged_at");
+    const { data: plans } = await supabaseAdmin.from("access_plans").select("user_id, plan, expires_at, whatsapp, last_charged_at, price_paid");
     const planMap = new Map((plans ?? []).map((p) => [p.user_id, p]));
     return data.users.filter((u) => !admins.has(u.id)).map((u) => ({
       plan: planMap.get(u.id)?.plan ?? "lifetime",
       expires_at: planMap.get(u.id)?.expires_at ?? null,
       whatsapp: planMap.get(u.id)?.whatsapp ?? "",
       last_charged_at: planMap.get(u.id)?.last_charged_at ?? null,
+      price_paid: planMap.get(u.id)?.price_paid ?? null,
       id: u.id,
       email: u.email ?? "",
       name: (u.user_metadata?.name as string) ?? "",
@@ -92,6 +98,7 @@ export const createAccess = createServerFn({ method: "POST" })
       user_id: created.user.id,
       plan: data.plan,
       expires_at: expiryFor(data.plan),
+      price_paid: await priceOf(supabaseAdmin, data.plan),
     });
     return { email, password };
   });
@@ -106,6 +113,7 @@ export const setAccessPlan = createServerFn({ method: "POST" })
       user_id: data.id,
       plan: data.plan,
       expires_at: expiryFor(data.plan),
+      price_paid: await priceOf(supabaseAdmin, data.plan),
       updated_at: new Date().toISOString(),
     });
     if (error) throw new Error(error.message);
