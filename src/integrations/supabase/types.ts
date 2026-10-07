@@ -17,21 +17,27 @@ export type Database = {
       access_plans: {
         Row: {
           expires_at: string | null
+          last_charged_at: string | null
           plan: string
           updated_at: string
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
           expires_at?: string | null
+          last_charged_at?: string | null
           plan?: string
           updated_at?: string
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
           expires_at?: string | null
+          last_charged_at?: string | null
           plan?: string
           updated_at?: string
           user_id?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
