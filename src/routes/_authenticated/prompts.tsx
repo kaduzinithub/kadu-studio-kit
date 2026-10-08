@@ -72,7 +72,7 @@ function PromptsPage() {
   const [files, setFiles] = useState<GeneratedSite["files"]>(emptyFiles);
   const [title, setTitle] = useState("");
   const [siteRequest, setSiteRequest] = useState("");
-  const [editRequest, setEditRequest] = useState("");
+  const [editRequest, setEditRequest] = useState<string>("");
   const [provider, setProvider] = useState("nvidia");
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
