@@ -72,7 +72,7 @@ function PromptsPage() {
   const [files, setFiles] = useState<GeneratedSite["files"]>(emptyFiles);
   const [title, setTitle] = useState("");
   const [siteRequest, setSiteRequest] = useState("");
-  const [editRequest, setEditRequest] = useState("");
+  const [editRequest, setEditRequest] = useState("");\n  const [provider, setProvider] = useState("nvidia");
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -131,7 +131,7 @@ function PromptsPage() {
     mutationFn: async () => {
       if (!selectedBriefing) throw new Error("Escolha um briefing antes de criar o site.");
       return generateSite({
-        data: { briefingId: selectedBriefing, request: siteRequest },
+        data: { briefingId: selectedBriefing, request: siteRequest, provider },
       }) as unknown as Promise<SiteRow>;
     },
     onSuccess: (site) => {
@@ -145,7 +145,7 @@ function PromptsPage() {
     mutationFn: async () => {
       if (!activeSite) throw new Error("Carregue uma versão antes de pedir uma edição.");
       return editGeneratedSite({
-        data: { siteId: activeSite.id, request: editRequest },
+        data: { siteId: activeSite.id, request: editRequest, provider },
       }) as unknown as Promise<SiteRow>;
     },
     onSuccess: (site) => {
