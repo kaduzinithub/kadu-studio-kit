@@ -17,10 +17,11 @@ function extractJson(text: string): unknown {
 }
 
 export class NvidiaNimProvider implements AIProvider {
+  constructor(private readonly modelOverride?: string) {}
   async generateSite({ prompt }: GenerateSiteInput): Promise<GeneratedProject> {
     const apiKey = process.env["NVIDIA_API_KEY"];
     if (!apiKey) throw new Error("A chave da NVIDIA ainda não foi configurada.");
-    const model = process.env["NVIDIA_MODEL"] || DEFAULT_MODEL;
+    const model = this.modelOverride || process.env["NVIDIA_MODEL"] || DEFAULT_MODEL;
 
     const res = await fetch(NIM_URL, {
       method: "POST",
