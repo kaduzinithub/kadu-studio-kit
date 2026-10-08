@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { buildPreviewHtml, buildSiteGenerationPrompt } from "@/lib/site-generator";
 import type { BriefingLike } from "@/lib/prompt-templates";
-import { getAIProvider } from "@/server/ai/provider";
+import { generateWithFallback } from "@/server/ai/provider";
 import { enforceAiRateLimit } from "@/server/ai/rate-limit";
 import { toGeneratedSiteFiles } from "@/server/ai/schemas";
 
@@ -37,7 +37,7 @@ export const generateSite = createServerFn({ method: "POST" })
 
 Pedido adicional do utilizador:
 ${data.request}` : ""}`;
-    const generated = await getAIProvider(data.provider).generateSite({ prompt });
+    const generated = await generateWithFallback(data.provider, (provider) => provider.generateSite({ prompt }));
     const files = toGeneratedSiteFiles(generated);
     const previewHtml = buildPreviewHtml(files);
     const { data: site, error: insertError } = await context.supabase
@@ -79,7 +79,7 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
           path,
           content,
         }));
-    const generated = await getAIProvider(data.provider).editSite({
+    const generated = await generateWithFallback(data.provider, (provider) => provider.editSite({
       prompt: `Modifique o site conforme este pedido, preservando o que não precisa mudar: ${data.request}`,
       currentFiles: originalFiles,
     });
