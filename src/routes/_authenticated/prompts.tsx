@@ -108,7 +108,20 @@ function PromptsPage() {
     setActiveSite(site);
     setSelectedBriefing(site.briefing_id ?? undefined);
     setTitle(site.title);
-    setFiles(site.files);
+    const raw = site.files as unknown;
+    const norm: GeneratedSite["files"] = { ...emptyFiles };
+    if (Array.isArray(raw)) {
+      for (const f of raw as Array<{ path?: string; content?: string }>) {
+        const p = String(f?.path ?? "").replace(/^\.?\//, "");
+        if (p in norm) (norm as Record<string, string>)[p] = String(f?.content ?? "");
+      }
+    } else if (raw && typeof raw === "object") {
+      for (const k of Object.keys(norm)) {
+        const v = (raw as Record<string, unknown>)[k];
+        if (typeof v === "string") (norm as Record<string, string>)[k] = v;
+      }
+    }
+    setFiles(norm);
   }
   useEffect(() => {
     if (!activeSite && sites.data?.[0]) loadSite(sites.data[0]);
