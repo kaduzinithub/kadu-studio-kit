@@ -11,11 +11,13 @@ const inputSchema = z.object({
   briefingId: z.string().uuid(),
   request: z.string().trim().max(4_000).optional(),
   provider: z.enum(["nvidia", "openai", "openrouter", "anthropic", "gemini", "groq"]).optional(),
+  model: z.string().trim().max(120).optional(),
 });
 const editSchema = z.object({
   siteId: z.string().uuid(),
   request: z.string().trim().min(3).max(4_000),
   provider: z.enum(["nvidia", "openai", "openrouter", "anthropic", "gemini", "groq"]).optional(),
+  model: z.string().trim().max(120).optional(),
 });
 
 export const generateSite = createServerFn({ method: "POST" })
@@ -37,7 +39,7 @@ export const generateSite = createServerFn({ method: "POST" })
 
 Pedido adicional do utilizador:
 ${data.request}` : ""}`;
-    const generated = await generateWithFallback(data.provider, (provider) => provider.generateSite({ prompt }));
+    const generated = await generateWithFallback(data.provider, (provider) => provider.generateSite({ prompt }), data.model);
     const files = toGeneratedSiteFiles(generated);
     const previewHtml = buildPreviewHtml(files);
     const { data: site, error: insertError } = await context.supabase
@@ -82,7 +84,7 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
     const generated = await generateWithFallback(data.provider, (provider) => provider.editSite({
       prompt: `Modifique o site conforme este pedido, preservando o que não precisa mudar: ${data.request}`,
       currentFiles: originalFiles,
-    }));
+    }), data.model);
     const files = toGeneratedSiteFiles(generated);
     const previewHtml = buildPreviewHtml(files);
     const { data: site, error: insertError } = await context.supabase
@@ -101,4 +103,20 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
       throw new Error(`A edição foi gerada, mas não pôde ser salva: ${insertError.message}`);
     console.info("[AI] edição salva e preview concluído");
     return site;
+  });
+
+
+export const testAIProvider = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator(z.object({
+    provider: z.enum(["nvidia", "openai", "openrouter", "anthropic", "gemini", "groq"]),
+    model: z.string().trim().min(1).max(120),
+  }))
+  .handler(async ({ data, context }) => {
+    enforceAiRateLimit(context.userId);
+    const { getAIProvider } = await import("@/server/ai/provider");
+    const provider = getAIProvider(data.provider, data.model);
+    const started = Date.now();
+    await provider.generateSite({ prompt: "Responda com um JSON mínimo válido para teste de conexão." });
+    return { status: 200, ok: true, provider: data.provider, model: data.model, latencyMs: Date.now() - started };
   });
