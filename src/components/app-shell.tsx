@@ -214,8 +214,8 @@ export function AppShell({
             )}
           >
             {/* K Logo */}
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] border border-orange-400/30 bg-gradient-to-br from-orange-300 via-orange-500 to-orange-700 text-lg font-black italic text-black shadow-[0_0_28px_rgba(255,100,0,0.22)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_38px_rgba(255,100,0,0.35)]">
-              <span className="relative z-10">K</span>
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] border border-orange-300/40 bg-[linear-gradient(145deg,#ffd0a1_0%,#ff8a2b_22%,#f05a00_55%,#7d2500_100%)] text-lg font-black italic text-[#1b0900] shadow-[inset_-3px_-4px_8px_rgba(70,15,0,0.35),inset_2px_2px_5px_rgba(255,255,255,0.45),0_0_28px_rgba(255,100,0,0.22)] transition-all duration-300 group-hover:scale-105 group-hover:-rotate-2 group-hover:shadow-[inset_-3px_-4px_8px_rgba(70,15,0,0.35),inset_2px_2px_5px_rgba(255,255,255,0.55),0_0_42px_rgba(255,100,0,0.38)]">
+              <span className="relative z-10 drop-shadow-[1px_2px_0_rgba(255,210,150,0.35)]">K</span>
               <div className="absolute inset-0 rounded-[13px] bg-white/20 opacity-0 blur-sm transition-opacity group-hover:opacity-40" />
             </div>
 
@@ -343,6 +343,20 @@ export function AppShell({
             </div>
           )}
         </nav>
+
+        {/* Sidebar status */}
+        {!collapsed && (
+          <div className="mx-3 mb-3 rounded-xl border border-orange-500/[0.10] bg-gradient-to-r from-orange-500/[0.055] to-transparent px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              </span>
+              <span className="text-[10px] font-semibold text-white/50">KaduDev Studios</span>
+              <span className="ml-auto text-[8px] uppercase tracking-wider text-emerald-400/60">Online</span>
+            </div>
+          </div>
+        )}
 
         {/* Collapse */}
         <div className="shrink-0 border-t border-white/[0.07] p-3">
@@ -498,7 +512,7 @@ export function AppShell({
       {/* Main area */}
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-20 flex h-[76px] shrink-0 items-center gap-3 border-b border-white/[0.07] bg-[#080604]/75 px-4 backdrop-blur-2xl md:px-8">
+        <header className="sticky top-0 z-20 flex h-[76px] shrink-0 items-center gap-3 border-b border-white/[0.07] bg-[#080604]/78 px-4 shadow-[0_10px_45px_rgba(0,0,0,0.18)] backdrop-blur-2xl md:px-8">
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-orange-500/10 to-transparent" />
 
           {/* Mobile menu */}
@@ -513,12 +527,12 @@ export function AppShell({
           </Button>
 
           {/* Search */}
-          <div className="relative flex max-w-xl flex-1">
+          <div className="group relative flex max-w-xl flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
 
             <Input
               placeholder="Pesquisar no KaduDev..."
-              className="h-10 w-full rounded-xl border-white/[0.07] bg-white/[0.025] pl-10 pr-12 text-[13px] text-white placeholder:text-white/25 transition-all duration-200 focus:border-orange-500/30 focus:bg-white/[0.04] focus:ring-1 focus:ring-orange-500/10"
+              className="h-10 w-full rounded-xl border-white/[0.07] bg-white/[0.025] pl-10 pr-12 text-[13px] text-white placeholder:text-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] transition-all duration-200 group-hover:border-white/[0.11] focus:border-orange-500/30 focus:bg-white/[0.04] focus:ring-1 focus:ring-orange-500/10"
             />
 
             <div className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md border border-white/[0.06] bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-medium text-white/20 sm:flex">
@@ -604,7 +618,9 @@ export function AppShell({
 
         {/* Content */}
         <main className="page-enter min-w-0 flex-1 p-4 md:p-8 lg:p-10">
-          {children}
+          <div className="mx-auto w-full max-w-[1600px]">
+            {children}
+          </div>
         </main>
       </div>
     </div>
