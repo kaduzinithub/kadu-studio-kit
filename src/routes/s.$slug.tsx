@@ -48,7 +48,7 @@ const getPublicSite = createServerFn({ method: "GET" })
     if (!site || !site.is_public) return null;
 
     const { data: tracking } = await supabaseAdmin
-      .from("site_tracking")
+      .from("site_tracking" as never)
       .select("ga4_measurement_id, google_tag_manager_id, meta_pixel_id, tiktok_pixel_id, custom_head_script, custom_body_script, utm_source_default, utm_medium_default, utm_campaign_default, track_page_views, track_whatsapp_clicks, track_phone_clicks, track_form_submissions")
       .eq("site_id", site.id)
       .maybeSingle();
