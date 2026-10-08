@@ -13,6 +13,44 @@ const inputSchema = z.object({
   provider: z.enum(["nvidia", "openai", "openrouter", "anthropic", "gemini", "groq"]).optional(),
   model: z.string().trim().max(120).optional(),
 });
+
+const PLAN_LIMITS = {
+  starter: { sites: 5, leads: 100, generations: 50 },
+  pro: { sites: 20, leads: 500, generations: 250 },
+  agency: { sites: Number.POSITIVE_INFINITY, leads: Number.POSITIVE_INFINITY, generations: 1000 },
+} as const;
+
+async function enforcePlanLimit(
+  supabase: typeof import("@/integrations/supabase/client.server").supabaseAdmin,
+  userId: string,
+  resource: "sites" | "generations",
+) {
+  const { data: access, error: accessError } = await supabase
+    .from("access_plans")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (accessError) throw new Error(`Não foi possível verificar seu plano: ${accessError.message}`);
+  const expiresAt = access?.expires_at ? new Date(String(access.expires_at)) : null;
+  if (!expiresAt || expiresAt.getTime() <= Date.now()) throw new Error("O seu acesso venceu. Fale com o administrador para renovar.");
+
+  const rawPlan = String((access as Record<string, unknown>).plan ?? (access as Record<string, unknown>).plan_name ?? "pro").toLowerCase();
+  const plan = rawPlan.includes("agency") ? "agency" : rawPlan.includes("starter") ? "starter" : "pro";
+  const limit = PLAN_LIMITS[plan][resource];
+
+  const query = resource === "sites"
+    ? supabase.from("generated_sites").select("id", { count: "exact", head: true }).eq("user_id", userId)
+    : supabase.from("generated_sites").select("id", { count: "exact", head: true }).eq("user_id", userId)
+        .gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+
+  const { count, error } = await query;
+  if (error) throw new Error(`Não foi possível verificar o uso: ${error.message}`);
+  if ((count ?? 0) >= limit) {
+    const label = resource === "sites" ? "sites" : "gerações de IA";
+    throw new Error(`Limite do plano ${plan} atingido para ${label}. Faça upgrade para continuar.`);
+  }
+}
+
 const editSchema = z.object({
   siteId: z.string().uuid(),
   request: z.string().trim().min(3).max(4_000),
@@ -25,8 +63,7 @@ export const generateSite = createServerFn({ method: "POST" })
   .validator(inputSchema)
   .handler(async ({ data, context }) => {
     enforceAiRateLimit(context.userId);
-    const { data: active } = await context.supabase.rpc("has_active_access", { _user_id: context.userId });
-    if (!active) throw new Error("O seu acesso venceu. Fale com o administrador para renovar.");
+    await enforcePlanLimit(context.supabase, context.userId, "generations");
     const { data: briefing, error: briefingError } = await context.supabase
       .from("briefings")
       .select("*")
@@ -65,8 +102,7 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
   .validator(editSchema)
   .handler(async ({ data, context }) => {
     enforceAiRateLimit(context.userId);
-    const { data: active } = await context.supabase.rpc("has_active_access", { _user_id: context.userId });
-    if (!active) throw new Error("O seu acesso venceu. Fale com o administrador para renovar.");
+    await enforcePlanLimit(context.supabase, context.userId, "generations");
     const { data: current, error } = await context.supabase
       .from("generated_sites")
       .select("*")
