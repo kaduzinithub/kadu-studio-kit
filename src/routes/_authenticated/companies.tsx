@@ -116,6 +116,8 @@ function CompaniesPage() {
         address: "",
       });
 
+            setSelectedFromMaps(false);
+
       qc.invalidateQueries({
         queryKey: ["companies"],
       });
@@ -153,6 +155,14 @@ function CompaniesPage() {
 
     onError: (e) => toast.error((e as Error).message),
   });
+
+  const [selectedFromMaps, setSelectedFromMaps] = useState(false);
+
+  function chooseCompanyFromMaps() {
+    setSelectedFromMaps(true);
+    document.getElementById("company-capture")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    toast.success("Empresa selecionada. Confira os dados e salve no CRM.");
+  }
 
   function search() {
     if (!niche || !city) {
@@ -374,7 +384,7 @@ function CompaniesPage() {
 
             {/* Search preview */}
             {searched && (
-              <div className="mt-5 overflow-hidden rounded-2xl border border-white/[0.07] bg-black/20">
+              <div className="mt-5 overflow-hidden rounded-2xl border border-orange-500/10 bg-black/20 shadow-[0_0_45px_rgba(255,100,0,0.04)]">
                 <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(255,120,30,0.8)]" />
@@ -407,7 +417,10 @@ function CompaniesPage() {
         </Card>
 
         {/* Manual company */}
-        <Card className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0e0a07]/75 p-6 backdrop-blur-xl">
+        <Card id="company-capture" className={cn(
+          "relative overflow-hidden rounded-2xl border bg-[#0e0a07]/75 p-6 backdrop-blur-xl transition-all duration-500",
+          selectedFromMaps ? "border-orange-500/30 shadow-[0_0_45px_rgba(255,100,0,0.09)]" : "border-white/[0.07]"
+        )}>
           <div className="pointer-events-none absolute -left-20 -top-20 h-40 w-40 rounded-full bg-orange-500/[0.035] blur-[70px]" />
 
           <div className="relative">
@@ -423,8 +436,13 @@ function CompaniesPage() {
                   </h3>
 
                   <p className="mt-0.5 text-[11px] text-white/30">
-                    Cadastre manualmente uma oportunidade
+                    {selectedFromMaps ? "Empresa selecionada no Maps — confirme os dados abaixo." : "Cadastre manualmente uma oportunidade"}
                   </p>
+                  {selectedFromMaps && (
+                    <span className="mt-3 inline-flex w-fit rounded-lg border border-orange-500/15 bg-orange-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-orange-300">
+                      Selecionada no Maps
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -506,7 +524,7 @@ function CompaniesPage() {
                 ) : (
                   <>
                     <Plus className="mr-2 h-4 w-4" />
-                    Adicionar empresa
+                    {selectedFromMaps ? "Salvar empresa no CRM" : "Adicionar empresa"}
                   </>
                 )}
               </Button>
