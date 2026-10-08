@@ -53,6 +53,10 @@ function IntegrationsPage() {
   const [connections, setConnections] = useState<ConnectionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sites, setSites] = useState<Array<{ id: string; title: string; created_at: string }>>([]);
+  const [trackingSite, setTrackingSite] = useState("");
+  const [tracking, setTracking] = useState({ ga4_measurement_id: "", google_tag_manager_id: "", meta_pixel_id: "", tiktok_pixel_id: "", utm_source_default: "", utm_medium_default: "", utm_campaign_default: "", track_page_views: true, track_whatsapp_clicks: true, track_phone_clicks: true, track_form_submissions: true });
+  const [trackingSaving, setTrackingSaving] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -69,6 +73,31 @@ function IntegrationsPage() {
     })();
     return () => { active = false; };
   }, [user.id]);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase.from("generated_sites").select("id,title,created_at").eq("user_id", user.id).order("created_at", { ascending: false });
+      setSites((data ?? []) as Array<{ id: string; title: string; created_at: string }>);
+      if (data?.[0]?.id) setTrackingSite(data[0].id);
+    })();
+  }, [user.id]);
+
+  useEffect(() => {
+    if (!trackingSite) return;
+    void (async () => {
+      const { data } = await supabase.from("site_tracking" as never).select("ga4_measurement_id,google_tag_manager_id,meta_pixel_id,tiktok_pixel_id,utm_source_default,utm_medium_default,utm_campaign_default,track_page_views,track_whatsapp_clicks,track_phone_clicks,track_form_submissions").eq("user_id", user.id).eq("site_id", trackingSite).maybeSingle();
+      if (data) setTracking((current) => ({ ...current, ...(data as Partial<typeof current>) }));
+      else setTracking((current) => ({ ...current, ga4_measurement_id: "", google_tag_manager_id: "", meta_pixel_id: "", tiktok_pixel_id: "", utm_source_default: "", utm_medium_default: "", utm_campaign_default: "" }));
+    })();
+  }, [trackingSite, user.id]);
+
+  const saveTracking = async () => {
+    if (!trackingSite) return toast.error("Gere um site primeiro para configurar o tracking.");
+    setTrackingSaving(true);
+    const { error } = await supabase.from("site_tracking" as never).upsert({ user_id: user.id, site_id: trackingSite, ...tracking } as never, { onConflict: "user_id,site_id" });
+    setTrackingSaving(false);
+    if (error) toast.error(error.message); else toast.success("Tracking salvo para este site.");
+  };
 
   const filtered = useMemo(() => INTEGRATIONS.filter((item) => {
     const matchesCategory = category === "Todas" || item.category === category;
@@ -162,6 +191,23 @@ function IntegrationsPage() {
           );
         })}
       </div>
+
+      <Card className="overflow-hidden border-orange-500/15 bg-gradient-to-br from-orange-500/[0.06] via-black/20 to-transparent">
+        <div className="border-b border-orange-500/10 px-6 py-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div><div className="flex items-center gap-2 text-sm font-semibold text-white"><MousePointerClick className="h-4 w-4 text-orange-300" /> Tracking Center</div><p className="mt-1 text-xs text-white/35">Configure pixels, analytics e atribuição por site gerado.</p></div>
+            <select value={trackingSite} onChange={(e) => setTrackingSite(e.target.value)} className="h-10 min-w-64 rounded-xl border border-orange-500/15 bg-black/40 px-3 text-xs text-white outline-none"><option value="">Selecione um site</option>{sites.map((site) => <option key={site.id} value={site.id}>{site.title}</option>)}</select>
+          </div>
+        </div>
+        <div className="grid gap-4 p-6 md:grid-cols-2">
+          {[["ga4_measurement_id","GA4 Measurement ID","G-XXXXXXXXXX"],["google_tag_manager_id","Google Tag Manager","GTM-XXXXXXX"],["meta_pixel_id","Meta Pixel","ID do Pixel"],["tiktok_pixel_id","TikTok Pixel","ID do Pixel"]].map(([key,label,placeholder]) => <div key={key} className="space-y-2"><label className="text-xs font-semibold text-white/65">{label}</label><Input value={tracking[key as keyof typeof tracking] as string} onChange={(e) => setTracking((current) => ({ ...current, [key]: e.target.value }))} placeholder={placeholder} className="border-white/[0.07] bg-black/25 text-white placeholder:text-white/20" /></div>)}
+          <div className="md:col-span-2 grid gap-4 sm:grid-cols-3">
+            {[["utm_source_default","UTM Source"],["utm_medium_default","UTM Medium"],["utm_campaign_default","UTM Campaign"]].map(([key,label]) => <div key={key} className="space-y-2"><label className="text-xs font-semibold text-white/65">{label}</label><Input value={tracking[key as keyof typeof tracking] as string} onChange={(e) => setTracking((current) => ({ ...current, [key]: e.target.value }))} placeholder="Opcional" className="border-white/[0.07] bg-black/25 text-white placeholder:text-white/20" /></div>)}
+          </div>
+          <div className="md:col-span-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{[["track_page_views","PageView"],["track_whatsapp_clicks","WhatsApp"],["track_phone_clicks","Telefone"],["track_form_submissions","Formulários"]].map(([key,label]) => <label key={key} className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-white/55"><input type="checkbox" checked={tracking[key as keyof typeof tracking] as boolean} onChange={(e) => setTracking((current) => ({ ...current, [key]: e.target.checked }))} />{label}</label>)}</div>
+          <div className="md:col-span-2 flex justify-end"><Button onClick={() => void saveTracking()} disabled={trackingSaving || !trackingSite}>{trackingSaving ? "Salvando…" : "Salvar tracking"}</Button></div>
+        </div>
+      </Card>
 
       <Card className="border-white/[0.06] bg-white/[0.015] p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
