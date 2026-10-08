@@ -29,7 +29,7 @@ import {
 import { useIbgeCities } from "@/lib/use-ibge-cities";
 
 export const Route = createFileRoute("/_authenticated/briefings")({
-  head: () => ({ meta: [{ title: "Briefings — KaduDev Prompt Engine" }] }),
+  head: () => ({ meta: [{ title: "Briefings — KaduDev Studios" }] }),
   component: BriefingsPage,
 });
 
@@ -149,7 +149,6 @@ function BriefingsPage() {
       const { error } = await supabase.from("briefings").update(rest).eq("id", id);
       if (error) throw error;
 
-      // Prompt gerado automaticamente a cada salvamento do briefing.
       const content = generatePrompt(b);
       const title = `Prompt — ${b.company_name || "Briefing"}`;
       const { data: existing } = await supabase
@@ -176,7 +175,6 @@ function BriefingsPage() {
 
   const generatedPrompt = useMemo(() => (draft ? generatePrompt(draft) : ""), [draft]);
 
-  // Autosave
   useEffect(() => {
     if (!draft) return;
     const t = setTimeout(() => save.mutate(draft), 800);
@@ -196,16 +194,22 @@ function BriefingsPage() {
   });
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Briefings"
-        description="Preencha todos os detalhes do site. Guardado automaticamente."
+        description="Transforme informações da empresa em um briefing pronto para gerar sites."
         actions={
-          <>
-            <Button onClick={() => createBriefing.mutate()}>+ Novo briefing</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => createBriefing.mutate()}
+              className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-black font-semibold shadow-[0_0_24px_rgba(249,115,22,0.22)] hover:brightness-110"
+            >
+              + Novo briefing
+            </Button>
             {draft && (
               <Button
                 variant="secondary"
+                className="border border-orange-500/20 bg-orange-500/10 text-orange-300 hover:bg-orange-500/15"
                 onClick={() =>
                   navigate({ to: "/prompts", search: { briefing: draft.id } as never })
                 }
@@ -213,219 +217,311 @@ function BriefingsPage() {
                 Criar site com IA
               </Button>
             )}
-          </>
+          </div>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <Card className="p-3">
-          <div className="text-xs uppercase text-muted-foreground px-2 pb-2">Briefings</div>
-          <div className="space-y-1 max-h-[70vh] overflow-y-auto">
+      <div className="grid gap-6 xl:grid-cols-[290px_minmax(0,1fr)]">
+        <Card className="overflow-hidden border-orange-500/10 bg-black/25 shadow-[0_16px_50px_rgba(0,0,0,0.25)]">
+          <div className="border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.08] to-transparent p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-semibold text-foreground">Seus briefings</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {list.data?.length ?? 0} projeto{(list.data?.length ?? 0) === 1 ? "" : "s"}
+                </div>
+              </div>
+              <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)]" />
+            </div>
+          </div>
+
+          <div className="max-h-[70vh] space-y-1 overflow-y-auto p-2">
             {(list.data ?? []).map((b) => (
               <button
                 key={b.id}
                 onClick={() => setSelected(b.id)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm ${selected === b.id ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}
+                className={`group w-full rounded-xl border px-3 py-3 text-left transition-all ${
+                  selected === b.id
+                    ? "border-orange-500/30 bg-orange-500/10 shadow-[inset_3px_0_0_rgba(249,115,22,0.9)]"
+                    : "border-transparent hover:border-orange-500/10 hover:bg-orange-500/[0.04]"
+                }`}
               >
-                <div className="font-medium truncate">{b.company_name}</div>
-                <div className="text-xs text-muted-foreground truncate">
-                  {b.niche} · {b.city}
+                <div className="flex items-center gap-2">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-bold ${
+                    selected === b.id
+                      ? "border-orange-400/30 bg-orange-500/15 text-orange-300"
+                      : "border-white/10 bg-white/[0.03] text-muted-foreground"
+                  }`}>
+                    {(b.company_name || "N").slice(0, 1).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">{b.company_name}</div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {b.niche || "Sem nicho"}{b.city ? ` · ${b.city}` : ""}
+                    </div>
+                  </div>
                 </div>
               </button>
             ))}
             {(list.data ?? []).length === 0 && (
-              <p className="text-sm text-muted-foreground px-2 py-6 text-center">
-                Nenhum briefing.
-              </p>
+              <div className="px-4 py-12 text-center">
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-orange-500/15 bg-orange-500/[0.06] text-orange-300">
+                  +
+                </div>
+                <p className="text-sm font-medium">Nenhum briefing ainda</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Crie o primeiro projeto para começar.
+                </p>
+              </div>
             )}
           </div>
         </Card>
 
         {draft ? (
-          <Card className="p-6 space-y-5">
-            <div className="grid gap-4 md:grid-cols-2">
-              {FIELDS.map((f) => (
-                <div
-                  key={f.key}
-                  className={`space-y-1.5 ${f.type === "textarea" || f.type === "pages" ? "md:col-span-2" : ""}`}
-                >
-                  <Label className="text-xs">{f.label}</Label>
-                  {f.type === "pages" ? (
-                    (() => {
-                      const { known, extra } = splitPages(draft.pages);
-                      const setPages = (nextKnown: string[], nextExtra: string) =>
-                        setDraft({
-                          ...draft,
-                          pages: [
-                            ...nextKnown,
-                            ...nextExtra
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter(Boolean),
-                          ].join(", "),
-                        });
-                      return (
-                        <div className="space-y-3">
-                          <div className="flex flex-wrap gap-2">
-                            {SITE_PAGES.map((p) => {
-                              const active = known.includes(p);
-                              return (
-                                <button
-                                  key={p}
-                                  type="button"
-                                  onClick={() =>
-                                    setPages(
-                                      active ? known.filter((k) => k !== p) : [...known, p],
-                                      extra,
-                                    )
-                                  }
-                                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${active ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:border-primary/50"}`}
-                                >
-                                  {p}
-                                </button>
-                              );
-                            })}
+          <Card className="overflow-hidden border-orange-500/10 bg-black/25 shadow-[0_20px_70px_rgba(0,0,0,0.28)]">
+            <div className="border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.07] via-transparent to-transparent px-5 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-orange-400/80">
+                    Projeto / Briefing
+                  </div>
+                  <div className="mt-1 truncate text-xl font-semibold tracking-tight">
+                    {draft.company_name || "Novo briefing"}
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    As alterações são salvas automaticamente.
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-full border border-emerald-500/15 bg-emerald-500/[0.06] px-3 py-1.5 text-xs text-emerald-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  Auto-save ativo
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6 p-5 md:p-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                {FIELDS.map((f) => (
+                  <div
+                    key={f.key}
+                    className={`space-y-1.5 ${
+                      f.type === "textarea" || f.type === "pages" ? "md:col-span-2" : ""
+                    }`}
+                  >
+                    <Label className="text-xs font-medium text-muted-foreground">{f.label}</Label>
+                    {f.type === "pages" ? (
+                      (() => {
+                        const { known, extra } = splitPages(draft.pages);
+                        const setPages = (nextKnown: string[], nextExtra: string) =>
+                          setDraft({
+                            ...draft,
+                            pages: [
+                              ...nextKnown,
+                              ...nextExtra
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean),
+                            ].join(", "),
+                          });
+                        return (
+                          <div className="space-y-3 rounded-xl border border-orange-500/10 bg-black/20 p-3">
+                            <div className="flex flex-wrap gap-2">
+                              {SITE_PAGES.map((p) => {
+                                const active = known.includes(p);
+                                return (
+                                  <button
+                                    key={p}
+                                    type="button"
+                                    onClick={() =>
+                                      setPages(
+                                        active ? known.filter((k) => k !== p) : [...known, p],
+                                        extra,
+                                      )
+                                    }
+                                    className={`rounded-full border px-3 py-1.5 text-xs transition-all ${
+                                      active
+                                        ? "border-orange-400/40 bg-orange-500/15 text-orange-200 shadow-[0_0_14px_rgba(249,115,22,0.12)]"
+                                        : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-orange-500/25 hover:text-foreground"
+                                    }`}
+                                  >
+                                    {p}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <Input
+                              placeholder="Outras páginas (separadas por vírgula)…"
+                              value={extra}
+                              onChange={(e) => setPages(known, e.target.value)}
+                            />
                           </div>
-                          <Input
-                            placeholder="Outras páginas (separadas por vírgula)…"
-                            value={extra}
-                            onChange={(e) => setPages(known, e.target.value)}
-                          />
-                        </div>
-                      );
-                    })()
-                  ) : f.type === "textarea" ? (
-                    <Textarea
-                      rows={3}
-                      value={(draft[f.key] as string) ?? ""}
-                      onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
-                    />
-                  ) : f.type === "color" ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={(draft[f.key] as string) || "#d4af37"}
+                        );
+                      })()
+                    ) : f.type === "textarea" ? (
+                      <Textarea
+                        rows={3}
+                        value={(draft[f.key] as string) ?? ""}
                         onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
-                        className="h-9 w-14 rounded-lg border border-border bg-transparent cursor-pointer"
+                        className="border-white/10 bg-black/20 transition-all focus:border-orange-500/40 focus:ring-orange-500/10"
                       />
+                    ) : f.type === "color" ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={(draft[f.key] as string) || "#f97316"}
+                          onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
+                          className="h-10 w-14 cursor-pointer rounded-lg border border-orange-500/15 bg-black/30 p-1"
+                        />
+                        <Input
+                          value={(draft[f.key] as string) ?? ""}
+                          onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
+                          className="border-white/10 bg-black/20 focus:border-orange-500/40 focus:ring-orange-500/10"
+                        />
+                      </div>
+                    ) : f.type === "select" ? (
+                      <Select
+                        value={(draft[f.key] as string) ?? ""}
+                        onValueChange={(v) => setDraft({ ...draft, [f.key]: v })}
+                      >
+                        <SelectTrigger className="border-white/10 bg-black/20 focus:border-orange-500/40 focus:ring-orange-500/10">
+                          <SelectValue placeholder="Escolher…" />
+                        </SelectTrigger>
+                        <SelectContent className="border-orange-500/15 bg-zinc-950">
+                          {(f.options ?? []).map((o) => (
+                            <SelectItem key={o} value={o}>
+                              {o}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : f.type === "state" ? (
+                      <Select
+                        value={(draft.state as string) ?? ""}
+                        onValueChange={(v) => setDraft({ ...draft, state: v, city: "" })}
+                      >
+                        <SelectTrigger className="border-white/10 bg-black/20 focus:border-orange-500/40 focus:ring-orange-500/10">
+                          <SelectValue placeholder="Escolher…" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72 border-orange-500/15 bg-zinc-950">
+                          {STATES.map((s) => (
+                            <SelectItem key={s.uf} value={s.name}>
+                              {s.name} ({s.uf})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : f.type === "city" ? (
+                      <Select
+                        value={(draft.city as string) ?? ""}
+                        onValueChange={(v) => setDraft({ ...draft, city: v })}
+                        disabled={!draft.state || cities.isLoading}
+                      >
+                        <SelectTrigger className="border-white/10 bg-black/20 focus:border-orange-500/40 focus:ring-orange-500/10">
+                          <SelectValue
+                            placeholder={
+                              !draft.state
+                                ? "Escolha o estado primeiro"
+                                : cities.isLoading
+                                  ? "Carregando cidades…"
+                                  : "Escolher…"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72 border-orange-500/15 bg-zinc-950">
+                          {(cities.data ?? []).map((c) => (
+                            <SelectItem key={c} value={c}>
+                              {c}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
                       <Input
                         value={(draft[f.key] as string) ?? ""}
                         onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
+                        className="border-white/10 bg-black/20 transition-all focus:border-orange-500/40 focus:ring-orange-500/10"
                       />
-                    </div>
-                  ) : f.type === "select" ? (
-                    <Select
-                      value={(draft[f.key] as string) ?? ""}
-                      onValueChange={(v) => setDraft({ ...draft, [f.key]: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Escolher…" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-72">
-                        {(f.options ?? []).map((o) => (
-                          <SelectItem key={o} value={o}>
-                            {o}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : f.type === "state" ? (
-                    <Select
-                      value={(draft.state as string) ?? ""}
-                      onValueChange={(v) => setDraft({ ...draft, state: v, city: "" })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Escolher…" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-72">
-                        {STATES.map((s) => (
-                          <SelectItem key={s.uf} value={s.name}>
-                            {s.name} ({s.uf})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : f.type === "city" ? (
-                    <Select
-                      value={(draft.city as string) ?? ""}
-                      onValueChange={(v) => setDraft({ ...draft, city: v })}
-                      disabled={!draft.state || cities.isLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            !draft.state
-                              ? "Escolha o estado primeiro"
-                              : cities.isLoading
-                                ? "Carregando cidades…"
-                                : "Escolher…"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-72">
-                        {(cities.data ?? []).map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      value={(draft[f.key] as string) ?? ""}
-                      onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
-                    />
-                  )}
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-4 border-t border-orange-500/10 pt-5 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground">Identidade</span>
+                  <div
+                    className="h-8 w-8 rounded-lg border border-white/10 shadow-[0_0_16px_rgba(249,115,22,0.08)]"
+                    style={{ background: draft.primary_color || "#f97316" }}
+                  />
+                  <div
+                    className="h-8 w-8 rounded-lg border border-white/10"
+                    style={{ background: draft.secondary_color || "#111" }}
+                  />
                 </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3 pt-2 border-t border-border">
-              <span className="text-xs text-muted-foreground">Preview:</span>
-              <div
-                className="h-8 w-8 rounded-lg border border-border"
-                style={{ background: draft.primary_color || "#d4af37" }}
-              />
-              <div
-                className="h-8 w-8 rounded-lg border border-border"
-                style={{ background: draft.secondary_color || "#111" }}
-              />
-              <div className="ml-auto flex gap-2">
-                <Button variant="ghost" onClick={() => remove.mutate(draft.id)}>
-                  Remover
-                </Button>
-                <Button onClick={() => save.mutate(draft)}>Guardar</Button>
+                <div className="sm:ml-auto flex flex-wrap gap-2">
+                  <Button
+                    variant="ghost"
+                    className="text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                    onClick={() => remove.mutate(draft.id)}
+                  >
+                    Remover
+                  </Button>
+                  <Button
+                    onClick={() => save.mutate(draft)}
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 font-semibold text-black shadow-[0_0_24px_rgba(249,115,22,0.18)] hover:brightness-110"
+                  >
+                    Guardar briefing
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2 border-t border-border pt-4">
-              <div className="flex items-center gap-3">
-                <Label className="text-xs">Prompt gerado automaticamente</Label>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-auto"
-                  onClick={() => {
-                    navigator.clipboard.writeText(generatedPrompt);
-                    toast.success("Prompt copiado");
-                  }}
-                >
-                  Copiar prompt
-                </Button>
+              <div className="overflow-hidden rounded-2xl border border-orange-500/15 bg-black/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                <div className="flex flex-wrap items-center gap-3 border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.08] to-transparent px-4 py-3">
+                  <div>
+                    <Label className="text-xs font-semibold">Prompt gerado automaticamente</Label>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      Pronto para usar no gerador de sites.
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto text-orange-300 hover:bg-orange-500/10 hover:text-orange-200"
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedPrompt);
+                      toast.success("Prompt copiado");
+                    }}
+                  >
+                    Copiar prompt
+                  </Button>
+                </div>
+                <div className="p-3">
+                  <Textarea
+                    readOnly
+                    value={generatedPrompt}
+                    className="min-h-56 border-white/5 bg-black/20 font-mono text-xs leading-relaxed text-zinc-300 focus-visible:ring-0"
+                  />
+                </div>
               </div>
-              <Textarea
-                readOnly
-                value={generatedPrompt}
-                className="min-h-56 bg-muted/30 font-mono text-xs leading-relaxed"
-              />
-              <p className="text-xs text-muted-foreground">
-                Atualizado sozinho sempre que o briefing é guardado.
-              </p>
             </div>
           </Card>
         ) : (
-          <Card className="p-10 text-center text-muted-foreground">
-            Selecione ou crie um briefing.
+          <Card className="flex min-h-[420px] items-center justify-center border-orange-500/10 bg-black/25 p-10 text-center shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
+            <div>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-500/[0.07] text-xl text-orange-300 shadow-[0_0_30px_rgba(249,115,22,0.1)]">
+                +
+              </div>
+              <div className="text-lg font-semibold">Selecione ou crie um briefing</div>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                Centralize os dados da empresa e transforme tudo em um prompt profissional.
+              </p>
+              <Button
+                className="mt-5 bg-gradient-to-r from-orange-500 to-amber-500 font-semibold text-black"
+                onClick={() => createBriefing.mutate()}
+              >
+                Criar primeiro briefing
+              </Button>
+            </div>
           </Card>
         )}
       </div>
