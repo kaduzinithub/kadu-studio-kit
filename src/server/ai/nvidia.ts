@@ -44,8 +44,8 @@ export class NvidiaNimProvider implements AIProvider {
       if (res.status === 401 || res.status === 403) throw new Error("A chave da NVIDIA é inválida ou sem acesso a este modelo.");
       if (res.status === 402) throw new Error("A conta NVIDIA ficou sem créditos.");
       if (res.status === 429) throw new Error("Limite da NVIDIA atingido. Aguarde um pouco e tente novamente.");
-      if (res.status === 404) throw new Error("Modelo NVIDIA não encontrado.");
-      throw new Error("A NVIDIA não respondeu. Tente novamente.");
+      if (res.status === 404) throw new Error("[HTTP 404] Modelo NVIDIA não encontrado.");
+      throw new Error(`[HTTP ${res.status}] A NVIDIA não respondeu. Tente novamente.`);
     }
 
     // Read SSE stream
