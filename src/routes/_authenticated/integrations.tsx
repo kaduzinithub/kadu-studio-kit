@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle2, ChevronRight, Code2, Facebook, Globe2, Link2, MousePointerClick, Plus, Radio, Search, ShieldCheck, Sparkles, Target, TrendingUp, Webhook } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { disconnectMetaOAuth, startMetaOAuth } from "@/server/integrations/meta.functions";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({ meta: [{ title: "Integrações — KaduDev Studios" }] }),
@@ -181,9 +182,45 @@ function IntegrationsPage() {
   const getConnection = (provider: string) => connections.find((item) => item.provider === provider);
   const isConnected = (provider: string) => getConnection(provider)?.status === "connected";
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const meta = params.get("meta");
+    if (meta === "connected") {
+      const accounts = params.get("accounts") || "0";
+      toast.success(`Meta Ads conectado com sucesso. ${accounts} conta(s) de anúncios encontrada(s).`);
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (meta === "error") {
+      const message = params.get("message") || "Não foi possível conectar o Meta Ads.";
+      toast.error(message);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   const toggleConnection = async (item: Integration) => {
     setSaving(true);
     const currentlyConnected = isConnected(item.id);
+
+    if (item.id === "meta-ads") {
+      try {
+        if (currentlyConnected) {
+          await disconnectMetaOAuth();
+          setConnections((current) => current.map((row) => row.provider === item.id
+            ? { ...row, status: "disconnected", account_name: null, account_id: null, connected_at: null }
+            : row));
+          toast.success("Meta Ads desconectado com segurança.");
+          setSelected(null);
+        } else {
+          const result = await startMetaOAuth({ data: {} });
+          window.location.assign(result.authorizationUrl);
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Não foi possível iniciar a conexão com o Meta Ads.");
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+
     const { data, error } = await supabase
       .from("integration_connections" as never)
       .upsert({
@@ -318,13 +355,15 @@ function IntegrationsPage() {
               <div className="space-y-3 py-3">
                 <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold text-white/70"><Globe2 className="h-4 w-4 text-orange-300" /> Conexão por conta</div>
-                  <p className="mt-2 text-xs leading-5 text-white/35">O vínculo fica salvo no seu workspace. A autenticação OAuth/API de cada provedor será adicionada na próxima camada, sem expor tokens no navegador.</p>
+                  <p className="mt-2 text-xs leading-5 text-white/35">{selected.id === "meta-ads"
+  ? "Você será redirecionado para o Meta para autorizar o acesso. O token fica criptografado e somente no backend."
+  : "O vínculo fica salvo no seu workspace. A autenticação OAuth/API deste provedor será adicionada na próxima camada."}</p>
                 </div>
                 {connection && <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3 text-xs text-white/30">Última alteração: <span className="text-white/60">{connection.connected_at ? new Date(connection.connected_at).toLocaleString("pt-BR") : "desativado"}</span></div>}
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setSelected(null)}>Fechar</Button>
-                <Button disabled={saving} onClick={() => void toggleConnection(selected)}>{saving ? "Salvando…" : active ? "Desativar" : "Ativar integração"}</Button>
+                <Button disabled={saving} onClick={() => void toggleConnection(selected)}>{saving ? "Conectando…" : active ? "Desconectar" : selected.id === "meta-ads" ? "Conectar com Meta" : "Ativar integração"}</Button>
               </DialogFooter>
             </>;
           })()}
