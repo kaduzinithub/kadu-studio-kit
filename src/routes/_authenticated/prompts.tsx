@@ -33,7 +33,7 @@ import {
 
 import { z } from "zod";
 
-const searchSchema = z.object({ briefing: z.string().optional() });
+const searchSchema = z.object({ briefing: z.string().optional(), site: z.string().optional() });
 const emptyFiles: GeneratedSite["files"] = { "index.html": "", "styles.css": "", "script.js": "" };
 type SiteRow = {
   id: string;
@@ -65,7 +65,7 @@ function safeFileName(value: string) {
 
 function PromptsPage() {
   const { user } = Route.useRouteContext();
-  const { briefing: initialBriefingId } = Route.useSearch();
+  const { briefing: initialBriefingId, site: initialSiteId } = Route.useSearch();
   const qc = useQueryClient();
   const [selectedBriefing, setSelectedBriefing] = useState<string | undefined>(initialBriefingId);
   const [activeSite, setActiveSite] = useState<SiteRow | null>(null);
@@ -127,8 +127,11 @@ function PromptsPage() {
     setFiles(norm);
   }
   useEffect(() => {
-    if (!activeSite && sites.data?.[0]) loadSite(sites.data[0]);
-  }, [sites.data, activeSite]);
+    if (activeSite) return;
+    const requested = initialSiteId ? sites.data?.find((site) => site.id === initialSiteId) : undefined;
+    if (requested) loadSite(requested);
+    else if (sites.data?.[0]) loadSite(sites.data[0]);
+  }, [sites.data, activeSite, initialSiteId]);
 
   const create = useMutation({
     mutationFn: async () => {
