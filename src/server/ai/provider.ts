@@ -13,36 +13,36 @@ export const AI_PROVIDER_LABELS: Record<AIProviderId, string> = {
   groq: "Groq",
 };
 
-export function getAIProvider(id = process.env.AI_PROVIDER || "nvidia"): AIProvider {
+export function getAIProvider(id = process.env.AI_PROVIDER || "nvidia", modelOverride?: string): AIProvider {
   switch (id as AIProviderId) {
     case "openai":
       return new OpenAICompatibleProvider(
         required("OPENAI_API_KEY", "OpenAI"),
         process.env.OPENAI_API_URL || "https://api.openai.com/v1/chat/completions",
-        process.env.OPENAI_MODEL || "gpt-5.4",
+        modelOverride || process.env.OPENAI_MODEL || "gpt-5.4",
         "OpenAI",
       );
     case "openrouter":
       return new OpenAICompatibleProvider(
         required("OPENROUTER_API_KEY", "OpenRouter"),
         "https://openrouter.ai/api/v1/chat/completions",
-        process.env.OPENROUTER_MODEL || "openai/gpt-5.4",
+        modelOverride || process.env.OPENROUTER_MODEL || "openai/gpt-5.4",
         "OpenRouter",
       );
     case "anthropic":
-      return new AnthropicProvider();
+      return new AnthropicProvider(modelOverride);
     case "gemini":
-      return new GeminiProvider();
+      return new GeminiProvider(modelOverride);
     case "groq":
       return new OpenAICompatibleProvider(
         required("GROQ_API_KEY", "Groq"),
         "https://api.groq.com/openai/v1/chat/completions",
-        process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+        modelOverride || process.env.GROQ_MODEL || "openai/gpt-oss-120b",
         "Groq",
       );
     case "nvidia":
     default:
-      return new NvidiaNimProvider();
+      return new NvidiaNimProvider(modelOverride);
   }
 }
 
