@@ -17,7 +17,7 @@ import { PageHeader } from "@/components/app-shell";
 import { toast } from "sonner";
 import type { BriefingLike } from "@/lib/prompt-templates";
 import { buildPreviewHtml, type GeneratedSite } from "@/lib/site-generator";
-import { editGeneratedSite, generateSite } from "@/site-generator.functions";
+import { editGeneratedSite, generateSite, testAIProvider } from "@/site-generator.functions";
 import { downloadFile } from "@/lib/format";
 import {
   Code2,
@@ -74,7 +74,7 @@ function PromptsPage() {
   const [siteRequest, setSiteRequest] = useState("");
   const [editRequest, setEditRequest] = useState<string>("");
   const [provider, setProvider] = useState("nvidia");
-  const [model, setModel] = useState("");
+  const [model, setModel] = useState("nvidia/nemotron-3-super-120b-a12b");
   const [testResult, setTestResult] = useState<{ status: number; ok: boolean; message: string } | null>(null);
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
@@ -134,7 +134,7 @@ function PromptsPage() {
     mutationFn: async () => {
       if (!selectedBriefing) throw new Error("Escolha um briefing antes de criar o site.");
       return generateSite({
-        data: { briefingId: selectedBriefing, request: siteRequest, provider },
+        data: { briefingId: selectedBriefing, request: siteRequest, provider, model },
       }) as unknown as Promise<SiteRow>;
     },
     onSuccess: (site) => {
@@ -148,7 +148,7 @@ function PromptsPage() {
     mutationFn: async () => {
       if (!activeSite) throw new Error("Carregue uma versão antes de pedir uma edição.");
       return editGeneratedSite({
-        data: { siteId: activeSite.id, request: editRequest, provider },
+        data: { siteId: activeSite.id, request: editRequest, provider, model },
       }) as unknown as Promise<SiteRow>;
     },
     onSuccess: (site) => {
@@ -328,6 +328,52 @@ function PromptsPage() {
               <Save className="mr-2 h-4 w-4" />
               Salvar versão
             </Button>
+          </Card>
+          <Card className="space-y-3 p-4">
+            <label className="text-xs uppercase text-muted-foreground">Modelo de IA</label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Select value={provider} onValueChange={(value) => {
+                setProvider(value);
+                const defaults: Record<string, string> = {
+                  nvidia: "nvidia/nemotron-3-super-120b-a12b",
+                  openai: "gpt-5.4",
+                  openrouter: "openai/gpt-5.4",
+                  anthropic: "claude-sonnet-4-5",
+                  gemini: "gemini-3.8-flash",
+                  groq: "openai/gpt-oss-120b",
+                };
+                setModel(defaults[value] ?? "");
+                setTestResult(null);
+              }}>
+                <SelectTrigger className="flex-1"><SelectValue placeholder="Provedor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nvidia">NVIDIA NIM</SelectItem>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="openrouter">OpenRouter</SelectItem>
+                  <SelectItem value="anthropic">Anthropic Claude</SelectItem>
+                  <SelectItem value="gemini">Google Gemini</SelectItem>
+                  <SelectItem value="groq">Groq</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={model} onValueChange={(value) => { setModel(value); setTestResult(null); }}>
+                <SelectTrigger className="flex-1"><SelectValue placeholder="Modelo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={model}>{model}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={async () => {
+                setTestResult(null);
+                try {
+                  const result = await testAIProvider({ data: { provider: provider as "nvidia" | "openai" | "openrouter" | "anthropic" | "gemini" | "groq", model } });
+                  setTestResult({ status: result.status, ok: result.ok, message: `200 OK · ${result.latencyMs}ms` });
+                } catch (error) {
+                  setTestResult({ status: 404, ok: false, message: error instanceof Error ? error.message : "Falha no teste" });
+                }
+              }} disabled={!model}>
+                Testar
+              </Button>
+            </div>
+            {testResult && <p className={`text-xs ${testResult.ok ? "text-emerald-500" : "text-red-400"}`}>{testResult.ok ? "✓" : "✕"} {testResult.message}</p>}
           </Card>
           <Card className="space-y-3 p-4">
             <label className="text-xs uppercase text-muted-foreground">Editar com IA</label>
