@@ -82,7 +82,7 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
     const generated = await generateWithFallback(data.provider, (provider) => provider.editSite({
       prompt: `Modifique o site conforme este pedido, preservando o que não precisa mudar: ${data.request}`,
       currentFiles: originalFiles,
-    });
+    }));
     const files = toGeneratedSiteFiles(generated);
     const previewHtml = buildPreviewHtml(files);
     const { data: site, error: insertError } = await context.supabase
