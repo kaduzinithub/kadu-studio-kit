@@ -129,7 +129,7 @@ function IntegrationsPage() {
       else setTrackingPreviewHtml("");
       setTrackingPreviewLoading(false);
     })();
-  }, [trackingSite, user.id]);
+  }, [trackingSite, user.id, tracking]);
 
 
 
