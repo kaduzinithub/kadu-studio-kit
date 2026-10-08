@@ -75,10 +75,11 @@ export class OpenAICompatibleProvider extends BaseProvider {
 }
 
 export class AnthropicProvider extends BaseProvider {
+  constructor(private readonly modelOverride?: string) { super(); }
   protected async complete(prompt: string) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("A chave da Anthropic ainda não foi configurada.");
-    const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5";
+    const model = this.modelOverride || process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5";
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -99,10 +100,11 @@ export class AnthropicProvider extends BaseProvider {
 }
 
 export class GeminiProvider extends BaseProvider {
+  constructor(private readonly modelOverride?: string) { super(); }
   protected async complete(prompt: string) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("A chave do Gemini ainda não foi configurada.");
-    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+    const model = this.modelOverride || process.env.GEMINI_MODEL || "gemini-3.8-flash";
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
