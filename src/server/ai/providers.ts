@@ -67,7 +67,7 @@ export class OpenAICompatibleProvider extends BaseProvider {
       console.error(`[AI] ${this.providerName} error`, res.status, body.slice(0, 500));
       if (res.status === 401 || res.status === 403) throw new Error(`A chave do ${this.providerName} é inválida ou sem acesso ao modelo.`);
       if (res.status === 429) throw new Error(`Limite do ${this.providerName} atingido. Tente novamente em alguns instantes.`);
-      throw new Error(`${this.providerName} não respondeu corretamente.`);
+      throw new Error(`[HTTP ${res.status}] ${this.providerName} não respondeu corretamente.`);
     }
     const json = JSON.parse(body) as { choices?: Array<{ message?: { content?: string }; text?: string }> };
     return json.choices?.[0]?.message?.content ?? json.choices?.[0]?.text ?? "";
@@ -92,7 +92,7 @@ export class AnthropicProvider extends BaseProvider {
     const body = await res.text();
     if (!res.ok) {
       console.error("[AI] Anthropic error", res.status, body.slice(0, 500));
-      throw new Error("A Anthropic não respondeu corretamente.");
+      throw new Error(`[HTTP ${res.status}] A Anthropic não respondeu corretamente.`);
     }
     const json = JSON.parse(body) as { content?: Array<{ type?: string; text?: string }> };
     return json.content?.filter((x) => x.type === "text").map((x) => x.text ?? "").join("") ?? "";
@@ -117,7 +117,7 @@ export class GeminiProvider extends BaseProvider {
     const body = await res.text();
     if (!res.ok) {
       console.error("[AI] Gemini error", res.status, body.slice(0, 500));
-      throw new Error("O Gemini não respondeu corretamente.");
+      throw new Error(`[HTTP ${res.status}] O Gemini não respondeu corretamente.`);
     }
     const json = JSON.parse(body) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
     return json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
