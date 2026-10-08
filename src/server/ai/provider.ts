@@ -48,12 +48,15 @@ export function getAIProvider(id = process.env.AI_PROVIDER || "nvidia", modelOve
 
 export function getAIProviderChain(preferred?: string, model?: string): Array<{ id: AIProviderId; provider: AIProvider }> {
   const configured = (process.env.AI_FALLBACK_PROVIDERS || "nvidia,openrouter,gemini,groq").split(",").map((v) => v.trim()).filter(Boolean);
-  const ids = [preferred || process.env.AI_PROVIDER || "nvidia", ...configured] as AIProviderId[];
+  const primary = (preferred || process.env.AI_PROVIDER || "nvidia") as AIProviderId;
+  const ids = [primary, ...configured] as AIProviderId[];
   const unique = [...new Set(ids)];
   const chain: Array<{ id: AIProviderId; provider: AIProvider }> = [];
   for (const id of unique) {
     try {
-      chain.push({ id, provider: getAIProvider(id, model) });
+      // The manually selected model applies only to the selected provider.
+      // Fallback providers use their own configured/default model.
+      chain.push({ id, provider: getAIProvider(id, id === primary ? model : undefined) });
     } catch (error) {
       console.warn("[AI] provider indisponível:", id, error instanceof Error ? error.message : error);
     }
