@@ -3,13 +3,13 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { buildPreviewHtml, buildSiteGenerationPrompt } from "@/lib/site-generator";
 import type { BriefingLike } from "@/lib/prompt-templates";
-import { NvidiaNimProvider } from "@/server/ai/nvidia";
+import { getAIProvider, type AIProviderId } from "@/server/ai/provider";
 import { enforceAiRateLimit } from "@/server/ai/rate-limit";
 import { toGeneratedSiteFiles } from "@/server/ai/schemas";
 
 const inputSchema = z.object({
   briefingId: z.string().uuid(),
-  request: z.string().trim().max(4_000).optional(),
+  request: z.string().trim().max(4_000).optional(),\n  provider: z.enum(["nvidia", "openai", "openrouter", "anthropic", "gemini", "groq"]).optional(),
 });
 const editSchema = z.object({
   siteId: z.string().uuid(),
@@ -32,7 +32,7 @@ export const generateSite = createServerFn({ method: "POST" })
       throw new Error("Briefing não encontrado ou sem permissão de acesso.");
 
     const prompt = `${buildSiteGenerationPrompt(briefing as BriefingLike)}${data.request ? `\n\nPedido adicional do utilizador:\n${data.request}` : ""}`;
-    const generated = await new NvidiaNimProvider().generateSite({ prompt });
+    const generated = await getAIProvider(data.provider).generateSite({ prompt });
     const files = toGeneratedSiteFiles(generated);
     const previewHtml = buildPreviewHtml(files);
     const { data: site, error: insertError } = await context.supabase
@@ -74,7 +74,7 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
           path,
           content,
         }));
-    const generated = await new NvidiaNimProvider().editSite({
+    const generated = await getAIProvider().editSite({
       prompt: `Modifique o site conforme este pedido, preservando o que não precisa mudar: ${data.request}`,
       currentFiles: originalFiles,
     });
