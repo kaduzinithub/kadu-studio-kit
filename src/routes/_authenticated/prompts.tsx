@@ -77,6 +77,7 @@ function PromptsPage() {
   const [model, setModel] = useState("nvidia/nemotron-3-super-120b-a12b");
   const [testResult, setTestResult] = useState<{ status: number; ok: boolean; message: string } | null>(null);
   const [origin, setOrigin] = useState("");
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   useEffect(() => setOrigin(window.location.origin), []);
 
   const briefings = useQuery({
@@ -218,6 +219,8 @@ function PromptsPage() {
     const text = `Olá! Preparei uma prévia do site: ${activeSite?.title ?? ""}\n${shareUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
+
+  const previewWidth = previewDevice === "desktop" ? "100%" : previewDevice === "tablet" ? "768px" : "390px";
 
   function openPreview() {
     if (!previewHtml) return;
@@ -497,21 +500,31 @@ function PromptsPage() {
               </TabsContent>
             </Tabs>
           </Card>
-          <Card id="site-preview" className="overflow-hidden">
-            <div className="border-b border-border px-4 py-3 text-sm font-medium">
-              Preview isolado
+          <Card id="site-preview" className="overflow-hidden border-orange-500/10 bg-[#0b0806]">
+            <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] px-4 py-3">
+              <div className="mr-auto flex items-center gap-2 text-sm font-medium text-white/80">
+                <Eye className="h-4 w-4 text-orange-400" />
+                Preview responsivo
+              </div>
+              <div className="flex rounded-lg border border-white/[0.07] bg-white/[0.025] p-1">
+                {(["desktop", "tablet", "mobile"] as const).map((value) => (
+                  <button key={value} type="button" onClick={() => setPreviewDevice(value)} className={`rounded-md px-3 py-1.5 text-[10px] font-semibold transition ${previewDevice === value ? "bg-orange-500/15 text-orange-300" : "text-white/35 hover:text-white/65"}`}>
+                    {value === "desktop" ? "Desktop" : value === "tablet" ? "Tablet" : "Mobile"}
+                  </button>
+                ))}
+              </div>
+              <Button size="sm" variant="outline" onClick={openPreview} disabled={!previewHtml}>
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Abrir
+              </Button>
             </div>
             {previewHtml ? (
-              <iframe
-                title="Preview do site gerado"
-                srcDoc={previewHtml}
-                sandbox="allow-scripts allow-forms allow-popups"
-                className="h-[680px] w-full bg-white"
-              />
-            ) : (
-              <div className="p-14 text-center text-sm text-muted-foreground">
-                Selecione um briefing e crie seu primeiro site.
+              <div className="flex min-h-[700px] justify-center overflow-auto bg-[radial-gradient(circle_at_top,rgba(255,100,0,0.08),transparent_35%)] p-3 md:p-5">
+                <div style={{ width: previewWidth, maxWidth: "100%", transition: "width 180ms ease" }} className="overflow-hidden rounded-xl border border-white/[0.08] bg-white shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
+                  <iframe title="Preview do site gerado" srcDoc={previewHtml} sandbox="allow-scripts allow-forms allow-popups" className="h-[680px] w-full bg-white" />
+                </div>
               </div>
+            ) : (
+              <div className="p-14 text-center text-sm text-muted-foreground">Selecione um briefing e crie seu primeiro site.</div>
             )}
           </Card>
         </div>
