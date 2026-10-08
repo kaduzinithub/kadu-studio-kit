@@ -57,6 +57,8 @@ function IntegrationsPage() {
   const [trackingSite, setTrackingSite] = useState("");
   const [tracking, setTracking] = useState({ ga4_measurement_id: "", google_tag_manager_id: "", meta_pixel_id: "", tiktok_pixel_id: "", utm_source_default: "", utm_medium_default: "", utm_campaign_default: "", track_page_views: true, track_whatsapp_clicks: true, track_phone_clicks: true, track_form_submissions: true });
   const [trackingSaving, setTrackingSaving] = useState(false);
+  const [trackingPreviewHtml, setTrackingPreviewHtml] = useState("");
+  const [trackingPreviewLoading, setTrackingPreviewLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -90,6 +92,24 @@ function IntegrationsPage() {
       else setTracking((current) => ({ ...current, ga4_measurement_id: "", google_tag_manager_id: "", meta_pixel_id: "", tiktok_pixel_id: "", utm_source_default: "", utm_medium_default: "", utm_campaign_default: "" }));
     })();
   }, [trackingSite, user.id]);
+
+  useEffect(() => {
+    if (!trackingSite) { setTrackingPreviewHtml(""); return; }
+    setTrackingPreviewLoading(true);
+    void (async () => {
+      const { data } = await supabase.from("generated_sites").select("preview_html").eq("id", trackingSite).eq("user_id", user.id).maybeSingle();
+      if (data?.preview_html) setTrackingPreviewHtml(String(data.preview_html));
+      else setTrackingPreviewHtml("");
+      setTrackingPreviewLoading(false);
+    })();
+  }, [trackingSite, user.id]);
+
+  const trackingSummary = [
+    tracking.ga4_measurement_id && "GA4",
+    tracking.google_tag_manager_id && "GTM",
+    tracking.meta_pixel_id && "Meta Pixel",
+    tracking.tiktok_pixel_id && "TikTok Pixel",
+  ].filter(Boolean) as string[];
 
   const saveTracking = async () => {
     if (!trackingSite) return toast.error("Gere um site primeiro para configurar o tracking.");
@@ -205,6 +225,20 @@ function IntegrationsPage() {
             {[["utm_source_default","UTM Source"],["utm_medium_default","UTM Medium"],["utm_campaign_default","UTM Campaign"]].map(([key,label]) => <div key={key} className="space-y-2"><label className="text-xs font-semibold text-white/65">{label}</label><Input value={tracking[key as keyof typeof tracking] as string} onChange={(e) => setTracking((current) => ({ ...current, [key]: e.target.value }))} placeholder="Opcional" className="border-white/[0.07] bg-black/25 text-white placeholder:text-white/20" /></div>)}
           </div>
           <div className="md:col-span-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{[["track_page_views","PageView"],["track_whatsapp_clicks","WhatsApp"],["track_phone_clicks","Telefone"],["track_form_submissions","Formulários"]].map(([key,label]) => <label key={key} className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-white/55"><input type="checkbox" checked={tracking[key as keyof typeof tracking] as boolean} onChange={(e) => setTracking((current) => ({ ...current, [key]: e.target.checked }))} />{label}</label>)}</div>
+          <div className="md:col-span-2 flex flex-col gap-3 rounded-xl border border-orange-500/10 bg-orange-500/[0.025] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-semibold text-white">Preview com Tracking Center</div>
+                <p className="mt-1 text-[11px] text-white/35">A prévia usa a versão atual do site selecionado. Salve o tracking e publique para aplicar os scripts no link público.</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {trackingSummary.length ? trackingSummary.map((item) => <Badge key={item} variant="outline" className="border-orange-500/15 bg-orange-500/[0.05] text-[10px] text-orange-200">{item}</Badge>) : <Badge variant="outline" className="border-white/[0.08] text-[10px] text-white/30">Nenhum pixel configurado</Badge>}
+              </div>
+            </div>
+            <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white">
+              {trackingPreviewLoading ? <div className="flex h-80 items-center justify-center text-xs text-black/45">Carregando preview…</div> : trackingPreviewHtml ? <iframe title="Preview do site com Tracking Center" srcDoc={trackingPreviewHtml} sandbox="allow-scripts allow-forms allow-popups" className="h-[520px] w-full" /> : <div className="flex h-80 items-center justify-center text-xs text-black/45">Selecione um site para visualizar o preview.</div>}
+            </div>
+          </div>
           <div className="md:col-span-2 flex justify-end"><Button onClick={() => void saveTracking()} disabled={trackingSaving || !trackingSite}>{trackingSaving ? "Salvando…" : "Salvar tracking"}</Button></div>
         </div>
       </Card>
