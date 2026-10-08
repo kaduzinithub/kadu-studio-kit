@@ -12,6 +12,7 @@ import {
   Cable,
   Globe2,
   CreditCard,
+  Webhook,
   Search,
   Bell,
   LogOut,
@@ -59,6 +60,7 @@ const NAV_GROUPS = [
   { label: "Sistema", items: [
     { to: "/integrations", label: "Integrações", icon: Cable },
     { to: "/billing", label: "Plano e uso", icon: CreditCard },
+    { to: "/webhooks", label: "Webhooks", icon: Webhook },
     { to: "/settings", label: "Configurações", icon: SettingsIcon },
   ] },
 ] as const;
