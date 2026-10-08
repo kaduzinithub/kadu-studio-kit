@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import logoK3D from "@/assets/logo-k-3d.png";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -70,7 +71,7 @@ function AuthPage() {
         <Card className="w-full overflow-hidden rounded-[30px] border border-white/[0.08] bg-[#100b08]/90 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.58),0_0_70px_rgba(255,100,0,0.08)] backdrop-blur-2xl">
           <div className="mb-8 flex flex-col items-center text-center">
             <div className="relative mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-[26px] border border-orange-300/25 bg-[#120a05] shadow-[0_0_45px_rgba(255,100,0,0.22)]">
-              <img src="/src/assets/logo-k-3d.png" alt="KaduDev Studios" className="h-full w-full object-contain p-1 drop-shadow-[0_7px_14px_rgba(255,100,0,0.3)]" />
+              <img src={logoK3D} alt="KaduDev Studios" className="h-full w-full object-contain p-1 drop-shadow-[0_7px_14px_rgba(255,100,0,0.3)]" />
             </div>
             <h1 className="font-display text-2xl font-semibold tracking-tight text-white">KaduDev Prompt Engine</h1>
             <p className="mt-1 text-sm text-white/35">{mode === "login" ? "Entrar na sua conta" : "Recuperar palavra-passe"}</p>
