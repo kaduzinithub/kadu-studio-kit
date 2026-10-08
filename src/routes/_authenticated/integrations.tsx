@@ -98,11 +98,38 @@ function IntegrationsPage() {
     setTrackingPreviewLoading(true);
     void (async () => {
       const { data } = await supabase.from("generated_sites").select("preview_html").eq("id", trackingSite).eq("user_id", user.id).maybeSingle();
-      if (data?.preview_html) setTrackingPreviewHtml(String(data.preview_html));
+      if (data?.preview_html) setTrackingPreviewHtml(buildTrackedPreview(String(data.preview_html), tracking));
       else setTrackingPreviewHtml("");
       setTrackingPreviewLoading(false);
     })();
   }, [trackingSite, user.id]);
+
+  const buildTrackedPreview = (html: string, config: typeof tracking) => {
+    let result = html;
+    const head: string[] = [];
+    const body: string[] = [];
+    const ga4 = config.ga4_measurement_id.trim();
+    const gtm = config.google_tag_manager_id.trim();
+    const meta = config.meta_pixel_id.trim();
+    const tiktok = config.tiktok_pixel_id.trim();
+    if (ga4 && config.track_page_views) head.push('<script async src="https://www.googletagmanager.com/gtag/js?id=' + ga4 + '"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","' + ga4 + '",{anonymize_ip:true});</script>');
+    if (gtm) {
+      head.push('<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f)})(window,document,"script","dataLayer","' + gtm + '");</script>');
+      body.push('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' + gtm + '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
+    }
+    if (meta) head.push('<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init","' + meta + '");fbq("track","PageView");</script>');
+    if (tiktok) head.push('<script>window.__KADUDEV_TIKTOK_PIXEL="' + tiktok + '";</script>');
+    const events: string[] = [];
+    if (config.track_whatsapp_clicks) events.push('document.addEventListener("click",function(e){var a=e.target.closest("a[href*=\"wa.me\"],a[href*=\"whatsapp\"],a[href*=\"api.whatsapp\"]");if(a&&window.gtag)gtag("event","whatsapp_click");if(a&&window.fbq)fbq("track","Contact",{method:"whatsapp"})})');
+    if (config.track_phone_clicks) events.push('document.addEventListener("click",function(e){var a=e.target.closest("a[href^=\"tel:\"]");if(a&&window.gtag)gtag("event","phone_click");if(a&&window.fbq)fbq("track","Contact",{method:"phone"})})');
+    if (config.track_form_submissions) events.push('document.addEventListener("submit",function(){if(window.gtag)gtag("event","form_submit");if(window.fbq)fbq("track","Lead")})');
+    if (events.length) head.push("<script>(function(){" + events.join(";") + "})();</script>");
+    const source=config.utm_source_default.trim(), medium=config.utm_medium_default.trim(), campaign=config.utm_campaign_default.trim();
+    if(source||medium||campaign) head.push('<script>(function(){var p=new URLSearchParams(location.search),u={source:p.get("utm_source")||"' + source + '",medium:p.get("utm_medium")||"' + medium + '",campaign:p.get("utm_campaign")||"' + campaign + '"};try{sessionStorage.setItem("kadudev_utm",JSON.stringify(u))}catch(e){}})();</script>');
+    if (head.length) result = result.includes("</head>") ? result.replace("</head>", head.join("") + "</head>") : head.join("") + result;
+    if (body.length) result = result.includes("</body>") ? result.replace("</body>", body.join("") + "</body>") : result + body.join("");
+    return result;
+  };
 
   const trackingSummary = [
     tracking.ga4_measurement_id && "GA4",
@@ -115,8 +142,11 @@ function IntegrationsPage() {
     if (!trackingSite) return toast.error("Gere um site primeiro para configurar o tracking.");
     setTrackingSaving(true);
     const { error } = await supabase.from("site_tracking" as never).upsert({ user_id: user.id, site_id: trackingSite, ...tracking } as never, { onConflict: "user_id,site_id" });
+    if (error) { setTrackingSaving(false); toast.error(error.message); return; }
+    const { data: site } = await supabase.from("generated_sites").select("preview_html").eq("id", trackingSite).eq("user_id", user.id).maybeSingle();
+    if (site?.preview_html) setTrackingPreviewHtml(buildTrackedPreview(String(site.preview_html), tracking));
     setTrackingSaving(false);
-    if (error) toast.error(error.message); else toast.success("Tracking salvo para este site.");
+    toast.success("Tracking salvo e aplicado ao preview.");
   };
 
   const filtered = useMemo(() => INTEGRATIONS.filter((item) => {
