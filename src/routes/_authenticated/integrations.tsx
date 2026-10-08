@@ -57,7 +57,7 @@ function IntegrationsPage() {
   const [trackingSite, setTrackingSite] = useState("");
   const [tracking, setTracking] = useState({ ga4_measurement_id: "", google_tag_manager_id: "", meta_pixel_id: "", tiktok_pixel_id: "", utm_source_default: "", utm_medium_default: "", utm_campaign_default: "", track_page_views: true, track_whatsapp_clicks: true, track_phone_clicks: true, track_form_submissions: true });
   const [trackingSaving, setTrackingSaving] = useState(false);
-  const [trackingPreviewHtml, setTrackingPreviewHtml] = useState("");
+  const [trackingSourceHtml, setTrackingSourceHtml] = useState("");
   const [trackingPreviewLoading, setTrackingPreviewLoading] = useState(false);
 
   useEffect(() => {
@@ -120,17 +120,29 @@ function IntegrationsPage() {
     return result;
   };
 
+  const trackingPreviewHtml = useMemo(
+    () => trackingSourceHtml ? buildTrackedPreview(trackingSourceHtml, tracking) : "",
+    [trackingSourceHtml, tracking],
+  );
+
   useEffect(() => {
-    if (!trackingSite) { setTrackingPreviewHtml(""); return; }
+    if (!trackingSite) {
+      setTrackingSourceHtml("");
+      setTrackingPreviewLoading(false);
+      return;
+    }
     setTrackingPreviewLoading(true);
     void (async () => {
-      const { data } = await supabase.from("generated_sites").select("preview_html").eq("id", trackingSite).eq("user_id", user.id).maybeSingle();
-      if (data?.preview_html) setTrackingPreviewHtml(buildTrackedPreview(String(data.preview_html), tracking));
-      else setTrackingPreviewHtml("");
+      const { data } = await supabase
+        .from("generated_sites")
+        .select("preview_html")
+        .eq("id", trackingSite)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setTrackingSourceHtml(data?.preview_html ? String(data.preview_html) : "");
       setTrackingPreviewLoading(false);
     })();
-  }, [trackingSite, user.id, tracking]);
-
+  }, [trackingSite, user.id]);
 
 
   const trackingSummary = [
@@ -155,10 +167,8 @@ function IntegrationsPage() {
     setTrackingSaving(true);
     const { error } = await supabase.from("site_tracking" as never).upsert({ user_id: user.id, site_id: trackingSite, ...tracking } as never, { onConflict: "user_id,site_id" });
     if (error) { setTrackingSaving(false); toast.error(error.message); return; }
-    const { data: site } = await supabase.from("generated_sites").select("preview_html").eq("id", trackingSite).eq("user_id", user.id).maybeSingle();
-    if (site?.preview_html) setTrackingPreviewHtml(buildTrackedPreview(String(site.preview_html), tracking));
     setTrackingSaving(false);
-    toast.success("Tracking salvo e aplicado ao preview.");
+    toast.success("Tracking salvo. O link público usará a configuração automaticamente.");
   };
 
   const filtered = useMemo(() => INTEGRATIONS.filter((item) => {
