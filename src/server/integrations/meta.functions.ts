@@ -10,7 +10,8 @@ function base64Url(bytes: Uint8Array) {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-function oauthRedirectUrl(request: Request) {
+function oauthRedirectUrl(request: Request | undefined) {
+  if (!request) throw new Error("Não foi possível obter a requisição OAuth.");
   return process.env.META_OAUTH_REDIRECT_URI || new URL("/api/integrations/meta/callback", request.url).toString();
 }
 
