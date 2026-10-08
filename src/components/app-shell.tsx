@@ -10,6 +10,8 @@ import {
   BarChart3,
   Settings as SettingsIcon,
   Cable,
+  Globe2,
+  CreditCard,
   Search,
   Bell,
   LogOut,
@@ -51,10 +53,12 @@ const NAV_GROUPS = [
     { to: "/briefings", label: "Briefings", icon: ClipboardList },
     { to: "/prompts", label: "Gerador de Prompt", icon: Sparkles },
     { to: "/messages", label: "Mensagens", icon: MessageSquare },
+    { to: "/sites", label: "Sites", icon: Globe2 },
   ]},
   { label: "Análise", items: [{ to: "/reports", label: "Relatórios", icon: BarChart3 }] },
   { label: "Sistema", items: [
     { to: "/integrations", label: "Integrações", icon: Cable },
+    { to: "/billing", label: "Plano e uso", icon: CreditCard },
     { to: "/settings", label: "Configurações", icon: SettingsIcon },
   ] },
 ] as const;
