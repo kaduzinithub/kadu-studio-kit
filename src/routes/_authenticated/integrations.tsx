@@ -39,7 +39,7 @@ function IntegrationsPage() {
   const [category, setCategory] = useState("Todas");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Integration | null>(null);
-  const [connected, setConnected] = useState<string[]>([]);
+  const [connected, setConnected] = useState<string[]>(() => JSON.parse(localStorage.getItem("kadudev-integrations") || "[]"));
 
   const filtered = useMemo(() => INTEGRATIONS.filter((item) => {
     const matchesCategory = category === "Todas" || item.category === category;
