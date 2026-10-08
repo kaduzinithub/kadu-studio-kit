@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/app-shell";
 import { brl, downloadFile, toCSV } from "@/lib/format";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, TrendingUp, Users, Target, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/reports")({
-  head: () => ({ meta: [{ title: "Relatórios — KaduDev Prompt Engine" }] }),
+  head: () => ({ meta: [{ title: "Relatórios — KaduDev Studios" }] }),
   component: ReportsPage,
 });
 
@@ -40,7 +40,7 @@ function ReportsPage() {
 
   function exportCsv() {
     const csv = toCSV(
-      (data?.clients ?? []).map((c) => ({
+      rows.map((c) => ({
         nome: c.name,
         nicho: c.niche,
         cidade: c.city,
@@ -52,34 +52,29 @@ function ReportsPage() {
     );
     downloadFile(`clientes-${new Date().toISOString().slice(0, 10)}.csv`, csv, "text/csv");
   }
+
   function exportXls() {
-    // XML Excel simples
     const headers = ["Nome", "Nicho", "Cidade", "Valor", "Data", "Status"];
-    const body = (data?.clients ?? []).map((c) => [
-      c.name,
-      c.niche,
-      c.city,
-      c.project_value,
-      c.close_date,
-      c.status,
-    ]);
+    const body = rows.map((c) => [c.name, c.niche, c.city, c.project_value, c.close_date, c.status]);
     const rowsHtml = [headers, ...body]
       .map((r) => `<tr>${r.map((v) => `<td>${v ?? ""}</td>`).join("")}</tr>`)
       .join("");
-    const html = `<html><body><table border="1">${rowsHtml}</table></body></html>`;
-    downloadFile(`clientes.xls`, html, "application/vnd.ms-excel");
+    downloadFile("clientes.xls", `<html><body><table border="1">${rowsHtml}</table></body></html>`, "application/vnd.ms-excel");
   }
+
   function exportPdf() {
     const total = rows.reduce((s, c) => s + Number(c.project_value || 0), 0);
     const win = window.open("", "_blank");
     if (!win) return;
     win.document.write(`
-      <html><head><title>Relatório KaduDev</title>
-      <style>body{font-family:Inter,Arial,sans-serif;padding:32px;color:#111}
-      h1{margin:0 0 8px} .muted{color:#666;margin-bottom:24px}
-      table{width:100%;border-collapse:collapse}
-      th,td{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:12px}
-      th{background:#f5f5f5}</style></head><body>
+      <html><head><title>Relatório KaduDev Studios</title>
+      <style>
+        body{font-family:Inter,Arial,sans-serif;padding:32px;color:#111}
+        h1{margin:0 0 8px}.muted{color:#666;margin-bottom:24px}
+        table{width:100%;border-collapse:collapse}
+        th,td{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:12px}
+        th{background:#f5f5f5}
+      </style></head><body>
       <h1>Relatório mensal — KaduDev Studios</h1>
       <div class="muted">Gerado em ${new Date().toLocaleString("pt-BR")}</div>
       <p>Total faturado: <b>${brl.format(total)}</b></p>
@@ -98,62 +93,85 @@ function ReportsPage() {
     leads: (data?.leads ?? []).length,
     prompts: (data?.prompts ?? []).length,
   };
+  const conversion = totals.leads ? Math.round((totals.clientes / totals.leads) * 100) : 0;
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Relatórios"
-        description="Exporte dados e visualize a faturação."
+        description="Acompanhe faturamento, aquisição e produtividade do seu CRM."
         actions={
-          <>
-            <Button variant="outline" onClick={exportCsv}>
-              <Download className="h-4 w-4 mr-1" /> CSV
-            </Button>
-            <Button variant="outline" onClick={exportXls}>
-              <Download className="h-4 w-4 mr-1" /> XLSX
-            </Button>
-            <Button onClick={exportPdf}>
-              <FileText className="h-4 w-4 mr-1" /> PDF
-            </Button>
-          </>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={exportCsv} className="border-orange-500/15 hover:bg-orange-500/10"><Download className="mr-1 h-4 w-4" /> CSV</Button>
+            <Button variant="outline" onClick={exportXls} className="border-orange-500/15 hover:bg-orange-500/10"><Download className="mr-1 h-4 w-4" /> XLSX</Button>
+            <Button onClick={exportPdf} className="bg-gradient-to-r from-orange-500 to-amber-500 font-semibold text-black shadow-[0_0_22px_rgba(249,115,22,0.18)] hover:brightness-110"><FileText className="mr-1 h-4 w-4" /> PDF</Button>
+          </div>
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-4 mb-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
-          { l: "Receita total", v: brl.format(totals.receita) },
-          { l: "Clientes", v: totals.clientes },
-          { l: "Leads", v: totals.leads },
-          { l: "Prompts", v: totals.prompts },
+          { label: "Receita total", value: brl.format(totals.receita), icon: TrendingUp, accent: "text-orange-300", bg: "bg-orange-500/10" },
+          { label: "Clientes", value: totals.clientes, icon: Users, accent: "text-emerald-300", bg: "bg-emerald-500/10" },
+          { label: "Leads", value: totals.leads, icon: Target, accent: "text-amber-300", bg: "bg-amber-500/10" },
+          { label: "Conversão", value: `${conversion}%`, icon: Sparkles, accent: "text-orange-300", bg: "bg-orange-500/10" },
         ].map((k) => (
-          <Card key={k.l} className="p-5">
-            <div className="text-xs uppercase text-muted-foreground">{k.l}</div>
-            <div className="text-2xl font-semibold mt-2">{k.v}</div>
+          <Card key={k.label} className="border-orange-500/10 bg-black/25 p-5 shadow-[0_14px_45px_rgba(0,0,0,0.22)]">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-xs text-muted-foreground">{k.label}</div>
+                <div className="mt-2 text-2xl font-semibold tracking-tight">{k.value}</div>
+              </div>
+              <div className={`rounded-xl border border-white/10 p-2.5 ${k.bg} ${k.accent}`}><k.icon className="h-4 w-4" /></div>
+            </div>
           </Card>
         ))}
       </div>
 
-      <Card className="p-6">
-        <h3 className="font-medium mb-4">Faturação mensal (12 meses)</h3>
-        <div className="h-80">
-          <ResponsiveContainer>
-            <BarChart data={months}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
-              <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  background: "var(--card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 12,
-                }}
-                formatter={(v: number) => brl.format(v)}
-              />
-              <Bar dataKey="receita" fill="var(--primary)" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_330px]">
+        <Card className="overflow-hidden border-orange-500/10 bg-black/25 shadow-[0_20px_70px_rgba(0,0,0,0.28)]">
+          <div className="border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.08] to-transparent px-5 py-4">
+            <div className="font-semibold">Faturamento mensal</div>
+            <div className="mt-1 text-xs text-muted-foreground">Últimos 12 meses com base nos clientes fechados.</div>
+          </div>
+          <div className="h-80 p-4">
+            <ResponsiveContainer>
+              <BarChart data={months}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} />
+                <Tooltip
+                  cursor={{ fill: "rgba(249,115,22,0.05)" }}
+                  contentStyle={{ background: "#090909", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 14, boxShadow: "0 16px 40px rgba(0,0,0,0.4)" }}
+                  formatter={(v: number) => brl.format(v)}
+                />
+                <Bar dataKey="receita" fill="#f97316" radius={[8, 8, 2, 2]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="overflow-hidden border-orange-500/10 bg-black/25 shadow-[0_20px_70px_rgba(0,0,0,0.28)]">
+          <div className="border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.07] to-transparent px-5 py-4">
+            <div className="font-semibold">Resumo executivo</div>
+            <div className="mt-1 text-xs text-muted-foreground">Visão rápida da operação.</div>
+          </div>
+          <div className="space-y-3 p-4">
+            <div className="rounded-xl border border-orange-500/10 bg-orange-500/[0.04] p-3">
+              <div className="text-xs text-muted-foreground">Ticket médio</div>
+              <div className="mt-1 text-lg font-semibold">{brl.format(totals.clientes ? totals.receita / totals.clientes : 0)}</div>
+            </div>
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
+              <div className="text-xs text-muted-foreground">Prompts gerados</div>
+              <div className="mt-1 text-lg font-semibold">{totals.prompts}</div>
+            </div>
+            <div className="rounded-xl border border-emerald-500/10 bg-emerald-500/[0.04] p-3">
+              <div className="text-xs text-muted-foreground">Relação leads → clientes</div>
+              <div className="mt-1 text-lg font-semibold">{totals.leads ? `${totals.clientes} / ${totals.leads}` : "0 / 0"}</div>
+            </div>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
