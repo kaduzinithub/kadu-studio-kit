@@ -288,6 +288,26 @@
   }
 }
 
+/* Primary buttons: molten amber gradient with soft glow */
+[data-slot="button"]:not([data-variant]):not(.bg-destructive),
+[data-slot="button"][data-variant="default"] {
+  background-image: linear-gradient(135deg, var(--glow-2), var(--primary) 60%, oklch(0.52 0.14 42));
+  box-shadow:
+    0 10px 24px -12px color-mix(in oklab, var(--primary) 55%, transparent),
+    inset 0 1px 0 color-mix(in oklab, var(--primary-foreground) 30%, transparent);
+  transition:
+    box-shadow 300ms ease,
+    transform 200ms ease,
+    filter 300ms ease;
+}
+[data-slot="button"][data-variant="default"]:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    0 14px 32px -14px color-mix(in oklab, var(--primary) 70%, transparent),
+    0 0 24px -10px color-mix(in oklab, var(--primary) 55%, transparent),
+    inset 0 1px 0 color-mix(in oklab, var(--primary-foreground) 30%, transparent);
+}
+
 @utility surface {
   background-color: var(--color-card);
   border: 1px solid var(--color-border);

@@ -153,7 +153,7 @@ export function AppShell({
                 className={cn(
                   "nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
                   active
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-gradient-to-r from-primary/20 to-primary/5 text-primary shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--primary)_25%,transparent)]"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground",
                 )}
               >
