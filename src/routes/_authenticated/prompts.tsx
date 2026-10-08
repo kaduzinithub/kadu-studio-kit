@@ -74,6 +74,8 @@ function PromptsPage() {
   const [siteRequest, setSiteRequest] = useState("");
   const [editRequest, setEditRequest] = useState<string>("");
   const [provider, setProvider] = useState("nvidia");
+  const [model, setModel] = useState("");
+  const [testResult, setTestResult] = useState<{ status: number; ok: boolean; message: string } | null>(null);
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
 
