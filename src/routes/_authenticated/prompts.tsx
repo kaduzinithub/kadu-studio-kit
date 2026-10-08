@@ -367,7 +367,10 @@ function PromptsPage() {
                   const result = await testAIProvider({ data: { provider: provider as "nvidia" | "openai" | "openrouter" | "anthropic" | "gemini" | "groq", model } });
                   setTestResult({ status: result.status, ok: result.ok, message: `200 OK · ${result.latencyMs}ms` });
                 } catch (error) {
-                  setTestResult({ status: 404, ok: false, message: error instanceof Error ? error.message : "Falha no teste" });
+                  const message = error instanceof Error ? error.message : "Falha no teste";
+                  const match = message.match(/\[HTTP (\d+)\]/);
+                  const status = match ? Number(match[1]) : 0;
+                  setTestResult({ status, ok: false, message: status ? `${status} · ${message.replace(/\[HTTP \d+\]\s*/, "")}` : message });
                 }
               }} disabled={!model}>
                 Testar
