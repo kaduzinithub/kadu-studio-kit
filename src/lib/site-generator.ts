@@ -42,6 +42,7 @@ ANTES DE CODIFICAR:
 2. Escolha uma direção de arte coerente com o negócio: paleta, contraste, densidade, formas, ritmo e composição.
 3. Planeje uma jornada de conversão clara. O visitante precisa entender em segundos quem é a empresa, o que ela oferece e qual ação deve tomar.
 4. Não copie um template conhecido. Faça escolhas visuais deliberadas e diferentes entre nichos.
+5. ATIVE O KADUDEV DESIGN ENGINE: escolha a direção visual pelo contexto do negócio. Exemplos: restaurante → editorial/gastronômico, fotografia de pratos e composição de menu; barbearia → masculino sofisticado, tipografia forte e cortes geométricos; clínica → confiança, espaço e clareza; imobiliária → luxo editorial, imóveis em destaque e navegação objetiva; academia → energia, números e blocos de performance; advocacia → autoridade, tipografia sóbria e composição institucional; tecnologia → produto, grid e interação; varejo → campanha, produto e CTA; serviços locais → proximidade, prova e contato rápido. Estes são pontos de partida, não templates: combine o contexto real do briefing e crie uma variação própria.
 
 DIREÇÃO VISUAL OBRIGATÓRIA:
 - Hero forte e único, com headline específica ao negócio, CTA principal e composição visual que ocupe o espaço com intenção.
