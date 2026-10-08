@@ -53,7 +53,7 @@ function IntegrationsPage() {
   const [connections, setConnections] = useState<ConnectionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [sites, setSites] = useState<Array<{ id: string; title: string; created_at: string }>>([]);
+  const [sites, setSites] = useState<Array<{ id: string; title: string; created_at: string; share_slug: string | null }>>([]);
   const [trackingSite, setTrackingSite] = useState("");
   const [tracking, setTracking] = useState({ ga4_measurement_id: "", google_tag_manager_id: "", meta_pixel_id: "", tiktok_pixel_id: "", utm_source_default: "", utm_medium_default: "", utm_campaign_default: "", track_page_views: true, track_whatsapp_clicks: true, track_phone_clicks: true, track_form_submissions: true });
   const [trackingSaving, setTrackingSaving] = useState(false);
@@ -78,8 +78,8 @@ function IntegrationsPage() {
 
   useEffect(() => {
     void (async () => {
-      const { data } = await supabase.from("generated_sites").select("id,title,created_at").eq("user_id", user.id).order("created_at", { ascending: false });
-      setSites((data ?? []) as Array<{ id: string; title: string; created_at: string }>);
+      const { data } = await supabase.from("generated_sites").select("id,title,created_at,share_slug").eq("user_id", user.id).order("created_at", { ascending: false });
+      setSites((data ?? []) as Array<{ id: string; title: string; created_at: string; share_slug: string | null }>);
       if (data?.[0]?.id) setTrackingSite(data[0].id);
     })();
   }, [user.id]);
@@ -139,6 +139,16 @@ function IntegrationsPage() {
     tracking.meta_pixel_id && "Meta Pixel",
     tracking.tiktok_pixel_id && "TikTok Pixel",
   ].filter(Boolean) as string[];
+
+  const selectedSite = sites.find((site) => site.id === trackingSite);
+
+  const openRealPreview = () => {
+    if (!selectedSite?.share_slug) {
+      toast.error("Este site ainda não possui um link público.");
+      return;
+    }
+    window.open("/s/" + selectedSite.share_slug, "_blank", "noopener,noreferrer");
+  };
 
   const saveTracking = async () => {
     if (!trackingSite) return toast.error("Gere um site primeiro para configurar o tracking.");
@@ -261,13 +271,13 @@ function IntegrationsPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-xs font-semibold text-white">Preview com Tracking Center</div>
-                <p className="mt-1 text-[11px] text-white/35">A prévia usa a versão atual do site selecionado. Salve o tracking e publique para aplicar os scripts no link público.</p>
+                <p className="mt-1 text-[11px] text-white/35">A prévia aplica o tracking configurado. Para validar o comportamento real dos pixels, abra o link público em uma nova aba.</p>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {trackingSummary.length ? trackingSummary.map((item) => <Badge key={item} variant="outline" className="border-orange-500/15 bg-orange-500/[0.05] text-[10px] text-orange-200">{item}</Badge>) : <Badge variant="outline" className="border-white/[0.08] text-[10px] text-white/30">Nenhum pixel configurado</Badge>}
               </div>
             </div>
-            <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2"><div className="flex items-center gap-2 text-[10px] text-emerald-300/80"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.8)]" /> Tracking preparado</div><Button type="button" variant="outline" size="sm" onClick={openRealPreview} disabled={!selectedSite?.share_slug} className="h-8 rounded-lg border-orange-500/15 bg-orange-500/[0.04] text-[10px] text-orange-200 hover:bg-orange-500/[0.08]">Abrir preview real</Button></div><div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white">
               {trackingPreviewLoading ? <div className="flex h-80 items-center justify-center text-xs text-black/45">Carregando preview…</div> : trackingPreviewHtml ? <iframe title="Preview do site com Tracking Center" srcDoc={trackingPreviewHtml} sandbox="allow-scripts allow-forms allow-popups allow-same-origin" className="h-[520px] w-full" /> : <div className="flex h-80 items-center justify-center text-xs text-black/45">Selecione um site para visualizar o preview.</div>}
             </div>
           </div>
