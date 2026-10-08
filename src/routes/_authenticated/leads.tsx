@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/leads")({
-  head: () => ({ meta: [{ title: "Leads — KaduDev Prompt Engine" }] }),
+  head: () => ({ meta: [{ title: "Leads — KaduDev Studios" }] }),
   component: LeadsPage,
 });
 
@@ -107,23 +107,23 @@ function LeadsPage() {
         actions={<Button onClick={() => createLead.mutate()}>+ Novo lead</Button>}
       />
 
-      <Tabs defaultValue="tabela">
-        <TabsList>
-          <TabsTrigger value="tabela">Tabela</TabsTrigger>
-          <TabsTrigger value="kanban">Kanban</TabsTrigger>
+      <Tabs defaultValue="tabela" className="relative">
+        <TabsList className="h-11 rounded-xl border border-white/[0.07] bg-[#0e0a07]/80 p-1 backdrop-blur-xl">
+          <TabsTrigger value="tabela" className="rounded-lg px-4 text-xs data-[state=active]:bg-orange-500/10 data-[state=active]:text-orange-300">Tabela</TabsTrigger>
+          <TabsTrigger value="kanban" className="rounded-lg px-4 text-xs data-[state=active]:bg-orange-500/10 data-[state=active]:text-orange-300">Kanban</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tabela">
-          <Card className="p-4 mt-4">
+          <Card className="mt-4 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0e0a07]/75 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.2)] backdrop-blur-xl">
             <div className="flex flex-wrap gap-3 mb-4">
               <Input
                 placeholder="Pesquisar…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="max-w-xs"
+                className="max-w-xs border-white/[0.08] bg-white/[0.025] text-white placeholder:text-white/25 focus-visible:ring-orange-500/30"
               />
               <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48 border-white/[0.08] bg-white/[0.025] text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -138,7 +138,7 @@ function LeadsPage() {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase text-muted-foreground">
+                <thead className="text-left text-[9px] uppercase tracking-[0.13em] text-white/25">
                   <tr>
                     <th className="pb-2">Nome</th>
                     <th className="pb-2">Nicho</th>
@@ -150,17 +150,17 @@ function LeadsPage() {
                 </thead>
                 <tbody>
                   {filtered.map((l) => (
-                    <tr key={l.id} className="border-t border-border">
-                      <td className="py-3 font-medium">{l.name}</td>
-                      <td className="py-3">{l.niche}</td>
-                      <td className="py-3">{l.city}</td>
-                      <td className="py-3">{l.whatsapp}</td>
+                    <tr key={l.id} className="border-t border-white/[0.045] transition-colors hover:bg-white/[0.018]">
+                      <td className="py-3 font-medium text-white/75">{l.name}</td>
+                      <td className="py-3 text-white/45">{l.niche || "—"}</td>
+                      <td className="py-3 text-white/45">{l.city || "—"}</td>
+                      <td className="py-3 text-white/45">{l.whatsapp || "—"}</td>
                       <td className="py-3">
                         <Select
                           value={l.status}
                           onValueChange={(v) => updateStatus.mutate({ id: l.id, status: v })}
                         >
-                          <SelectTrigger className="w-36 h-8">
+                          <SelectTrigger className="h-8 w-36 border-orange-500/15 bg-orange-500/[0.05] text-xs text-orange-200">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -204,7 +204,7 @@ function LeadsPage() {
                   if (id) updateStatus.mutate({ id, status: s });
                 }}
               >
-                <div className="text-xs uppercase text-muted-foreground mb-2 flex items-center justify-between">
+                <div className="mb-3 flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-white/30">
                   <span>{STATUS_LABEL[s]}</span>
                   <span>{(leads.data ?? []).filter((l) => l.status === s).length}</span>
                 </div>
@@ -216,10 +216,10 @@ function LeadsPage() {
                         key={l.id}
                         draggable
                         onDragStart={(e) => e.dataTransfer.setData("id", l.id)}
-                        className="rounded-xl border border-border bg-muted/40 p-3 cursor-grab active:cursor-grabbing"
+                        className="cursor-grab rounded-xl border border-white/[0.06] bg-white/[0.025] p-3 transition-all hover:border-orange-500/20 hover:bg-orange-500/[0.04] active:cursor-grabbing"
                       >
-                        <div className="text-sm font-medium truncate">{l.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">
+                        <div className="truncate text-sm font-medium text-white/75">{l.name}</div>
+                        <div className="truncate text-xs text-white/30">
                           {l.niche} · {l.city}
                         </div>
                       </div>
