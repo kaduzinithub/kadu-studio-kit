@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { buildPreviewHtml, buildSiteGenerationPrompt } from "@/lib/site-generator";
@@ -21,7 +23,7 @@ const PLAN_LIMITS = {
 } as const;
 
 async function enforcePlanLimit(
-  supabase: typeof import("@/integrations/supabase/client.server").supabaseAdmin,
+  supabase: SupabaseClient<Database>,
   userId: string,
   resource: "sites" | "generations",
 ) {
