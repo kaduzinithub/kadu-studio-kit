@@ -93,17 +93,6 @@ function IntegrationsPage() {
     })();
   }, [trackingSite, user.id]);
 
-  useEffect(() => {
-    if (!trackingSite) { setTrackingPreviewHtml(""); return; }
-    setTrackingPreviewLoading(true);
-    void (async () => {
-      const { data } = await supabase.from("generated_sites").select("preview_html").eq("id", trackingSite).eq("user_id", user.id).maybeSingle();
-      if (data?.preview_html) setTrackingPreviewHtml(buildTrackedPreview(String(data.preview_html), tracking));
-      else setTrackingPreviewHtml("");
-      setTrackingPreviewLoading(false);
-    })();
-  }, [trackingSite, user.id]);
-
   const buildTrackedPreview = (html: string, config: typeof tracking) => {
     let result = html;
     const head: string[] = [];
@@ -130,6 +119,19 @@ function IntegrationsPage() {
     if (body.length) result = result.includes("</body>") ? result.replace("</body>", body.join("") + "</body>") : result + body.join("");
     return result;
   };
+
+  useEffect(() => {
+    if (!trackingSite) { setTrackingPreviewHtml(""); return; }
+    setTrackingPreviewLoading(true);
+    void (async () => {
+      const { data } = await supabase.from("generated_sites").select("preview_html").eq("id", trackingSite).eq("user_id", user.id).maybeSingle();
+      if (data?.preview_html) setTrackingPreviewHtml(buildTrackedPreview(String(data.preview_html), tracking));
+      else setTrackingPreviewHtml("");
+      setTrackingPreviewLoading(false);
+    })();
+  }, [trackingSite, user.id]);
+
+
 
   const trackingSummary = [
     tracking.ga4_measurement_id && "GA4",
@@ -266,7 +268,7 @@ function IntegrationsPage() {
               </div>
             </div>
             <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-white">
-              {trackingPreviewLoading ? <div className="flex h-80 items-center justify-center text-xs text-black/45">Carregando preview…</div> : trackingPreviewHtml ? <iframe title="Preview do site com Tracking Center" srcDoc={trackingPreviewHtml} sandbox="allow-scripts allow-forms allow-popups" className="h-[520px] w-full" /> : <div className="flex h-80 items-center justify-center text-xs text-black/45">Selecione um site para visualizar o preview.</div>}
+              {trackingPreviewLoading ? <div className="flex h-80 items-center justify-center text-xs text-black/45">Carregando preview…</div> : trackingPreviewHtml ? <iframe title="Preview do site com Tracking Center" srcDoc={trackingPreviewHtml} sandbox="allow-scripts allow-forms allow-popups allow-same-origin" className="h-[520px] w-full" /> : <div className="flex h-80 items-center justify-center text-xs text-black/45">Selecione um site para visualizar o preview.</div>}
             </div>
           </div>
           <div className="md:col-span-2 flex justify-end"><Button onClick={() => void saveTracking()} disabled={trackingSaving || !trackingSite}>{trackingSaving ? "Salvando…" : "Salvar tracking"}</Button></div>
