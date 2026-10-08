@@ -46,14 +46,14 @@ export function getAIProvider(id = process.env.AI_PROVIDER || "nvidia", modelOve
   }
 }
 
-export function getAIProviderChain(preferred?: string): Array<{ id: AIProviderId; provider: AIProvider }> {
+export function getAIProviderChain(preferred?: string, model?: string): Array<{ id: AIProviderId; provider: AIProvider }> {
   const configured = (process.env.AI_FALLBACK_PROVIDERS || "nvidia,openrouter,gemini,groq").split(",").map((v) => v.trim()).filter(Boolean);
   const ids = [preferred || process.env.AI_PROVIDER || "nvidia", ...configured] as AIProviderId[];
   const unique = [...new Set(ids)];
   const chain: Array<{ id: AIProviderId; provider: AIProvider }> = [];
   for (const id of unique) {
     try {
-      chain.push({ id, provider: getAIProvider(id) });
+      chain.push({ id, provider: getAIProvider(id, model) });
     } catch (error) {
       console.warn("[AI] provider indisponível:", id, error instanceof Error ? error.message : error);
     }
@@ -64,8 +64,9 @@ export function getAIProviderChain(preferred?: string): Array<{ id: AIProviderId
 export async function generateWithFallback<T>(
   preferred: string | undefined,
   operation: (provider: AIProvider) => Promise<T>,
+  model?: string,
 ): Promise<T> {
-  const chain = getAIProviderChain(preferred);
+  const chain = getAIProviderChain(preferred, model);
   if (!chain.length) throw new Error("Nenhum provider de IA está configurado.");
   const errors: string[] = [];
   for (const { id, provider } of chain) {
