@@ -9,6 +9,7 @@ import {
   Briefcase,
   BarChart3,
   Settings as SettingsIcon,
+  Cable,
   Search,
   Bell,
   LogOut,
@@ -52,7 +53,10 @@ const NAV_GROUPS = [
     { to: "/messages", label: "Mensagens", icon: MessageSquare },
   ]},
   { label: "Análise", items: [{ to: "/reports", label: "Relatórios", icon: BarChart3 }] },
-  { label: "Sistema", items: [{ to: "/settings", label: "Configurações", icon: SettingsIcon }] },
+  { label: "Sistema", items: [
+    { to: "/integrations", label: "Integrações", icon: Cable },
+    { to: "/settings", label: "Configurações", icon: SettingsIcon },
+  ] },
 ] as const;
 
 const ADMIN_ITEMS = [
