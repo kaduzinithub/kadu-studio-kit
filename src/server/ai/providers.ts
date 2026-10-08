@@ -6,7 +6,7 @@ const SYSTEM = `Você é um web designer sênior. Responda APENAS com um objeto 
 O index.html deve referenciar styles.css e script.js. Site completo, moderno, responsivo, em português.`;
 
 function extractJson(text: string): GeneratedProject {
-  const cleaned = text.replace(/<think>[\\s\\S]*?<\\/think>/g, "").replace(/\\`\\`\\`(?:json)?/g, "");
+  const cleaned = text.replace(/<think>[\s\S]*?<\/think>/g, "").replace(/```(?:json)?/g, "");
   const start = cleaned.indexOf("{");
   const end = cleaned.lastIndexOf("}");
   if (start < 0 || end <= start) throw new Error("A IA não retornou JSON válido.");
