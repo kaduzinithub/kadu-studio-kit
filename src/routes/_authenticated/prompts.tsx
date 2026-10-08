@@ -358,7 +358,16 @@ function PromptsPage() {
               <Select value={model} onValueChange={(value) => { setModel(value); setTestResult(null); }}>
                 <SelectTrigger className="flex-1"><SelectValue placeholder="Modelo" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={model}>{model}</SelectItem>
+                  {provider === "groq" ? (
+                    <>
+                      <SelectItem value="openai/gpt-oss-120b">GPT-OSS 120B · ⭐ Recomendado</SelectItem>
+                      <SelectItem value="openai/gpt-oss-20b">GPT-OSS 20B · ⚡ Ultra rápido</SelectItem>
+                      <SelectItem value="qwen/qwen3.8-27b">Qwen 3.8 27B · 🧠 Raciocínio + visão</SelectItem>
+                      <SelectItem value="minimaxai/minimax-m2.7">MiniMax M2.7 · 🚀 Agentic (Preview)</SelectItem>
+                    </>
+                  ) : (
+                    <SelectItem value={model}>{model}</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={async () => {
