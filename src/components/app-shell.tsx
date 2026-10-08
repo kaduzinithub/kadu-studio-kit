@@ -16,6 +16,10 @@ import {
   ShieldCheck,
   Wallet,
   Tag,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Command,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
@@ -34,22 +38,42 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/companies", label: "Empresas / Maps", icon: MapPin },
-  { to: "/leads", label: "Leads", icon: Users },
-  { to: "/briefings", label: "Briefings", icon: ClipboardList },
-  { to: "/prompts", label: "Gerador de Prompt", icon: Sparkles },
-  { to: "/messages", label: "Mensagens", icon: MessageSquare },
-  { to: "/clients", label: "Clientes", icon: Briefcase },
-  { to: "/reports", label: "Relatórios", icon: BarChart3 },
-  { to: "/settings", label: "Configurações", icon: SettingsIcon },
+const NAV_GROUPS = [
+  {
+    label: "Principal",
+    items: [
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/companies", label: "Empresas / Maps", icon: MapPin },
+      { to: "/leads", label: "Leads", icon: Users },
+      { to: "/clients", label: "Clientes", icon: Briefcase },
+    ],
+  },
+  {
+    label: "Produção",
+    items: [
+      { to: "/briefings", label: "Briefings", icon: ClipboardList },
+      { to: "/prompts", label: "Gerador de Prompt", icon: Sparkles },
+      { to: "/messages", label: "Mensagens", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Análise",
+    items: [
+      { to: "/reports", label: "Relatórios", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Sistema",
+    items: [
+      { to: "/settings", label: "Configurações", icon: SettingsIcon },
+    ],
+  },
 ] as const;
 
 const ADMIN_ITEMS = [
-  { to: "/admin", label: "Admin · Acessos", icon: ShieldCheck },
-  { to: "/admin-vendas", label: "Admin · Vendas", icon: Wallet },
-  { to: "/admin-precos", label: "Admin · Preços", icon: Tag },
+  { to: "/admin", label: "Acessos", icon: ShieldCheck },
+  { to: "/admin-vendas", label: "Vendas", icon: Wallet },
+  { to: "/admin-precos", label: "Preços", icon: Tag },
 ] as const;
 
 export function AppShell({
@@ -61,43 +85,61 @@ export function AppShell({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const pathname = useRouterState({
+    select: (s) => s.location.pathname,
+  });
+
   const navigate = useNavigate();
+
   const isAdmin = useQuery({
     queryKey: ["is-admin"],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
+
       if (!u.user) return false;
+
       const { data } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", u.user.id)
         .eq("role", "admin")
         .maybeSingle();
+
       return !!data;
     },
     staleTime: 5 * 60 * 1000,
   }).data;
+
   const access = useQuery({
     queryKey: ["my-access"],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
+
       if (!u.user) return null;
+
       const { data } = await supabase
         .from("access_plans")
         .select("expires_at")
         .eq("user_id", u.user.id)
         .maybeSingle();
+
       return data?.expires_at ?? null;
     },
     staleTime: 60 * 1000,
   }).data;
-  const expired = isAdmin === false && !!access && new Date(access) < new Date();
-  const nav: Array<(typeof NAV)[number] | (typeof ADMIN_ITEMS)[number]> = isAdmin ? [...NAV, ...ADMIN_ITEMS] : [...NAV];
+
+  const expired =
+    isAdmin === false &&
+    !!access &&
+    new Date(access) < new Date();
 
   async function signOut() {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({
+      to: "/auth",
+      replace: true,
+    });
   }
 
   const initials = (user.name || user.email || "K")
@@ -109,163 +151,461 @@ export function AppShell({
 
   if (expired) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
-        <div className="luxury-card max-w-md rounded-[20px] border border-border bg-card p-8 text-center space-y-4">
-          <h1 className="font-display text-3xl italic">Acesso vencido</h1>
-          <p className="text-sm text-muted-foreground">
-            O seu acesso terminou em {new Date(access!).toLocaleDateString("pt-BR")}. Fale com o
-            administrador para renovar.
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#080604] p-6 text-foreground">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,110,0,0.14),transparent_40%)]" />
+
+        <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-orange-500/20 bg-[#100b07]/90 p-8 text-center shadow-[0_30px_100px_rgba(0,0,0,0.55),0_0_80px_rgba(255,100,0,0.08)] backdrop-blur-2xl">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-500/10 text-xl font-black text-orange-400 shadow-[0_0_35px_rgba(255,100,0,0.15)]">
+            K
+          </div>
+
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            Acesso vencido
+          </h1>
+
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            O seu acesso terminou em{" "}
+            <span className="font-medium text-foreground">
+              {new Date(access!).toLocaleDateString("pt-BR")}
+            </span>
+            . Fale com o administrador para renovar.
           </p>
-          <Button onClick={signOut}>Sair</Button>
+
+          <Button
+            onClick={signOut}
+            className="mt-6 h-11 w-full rounded-xl bg-orange-500 font-semibold text-black shadow-[0_0_30px_rgba(255,100,0,0.2)] transition-all hover:bg-orange-400 hover:shadow-[0_0_40px_rgba(255,100,0,0.3)]"
+          >
+            Sair
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="app-frame flex min-h-screen w-full bg-background text-foreground">
-      {/* Sidebar */}
+    <div className="app-frame relative flex min-h-screen w-full overflow-hidden bg-[#080604] text-foreground">
+      {/* Ambient background */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-orange-600/[0.045] blur-[120px]" />
+        <div className="absolute -bottom-40 right-0 h-[500px] w-[500px] rounded-full bg-orange-500/[0.035] blur-[130px]" />
+      </div>
+
+      {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden md:flex flex-col border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl transition-all duration-500",
-          collapsed ? "w-[72px]" : "w-64",
+          "relative z-30 hidden shrink-0 md:flex flex-col border-r border-white/[0.07] bg-[#0a0705]/90 backdrop-blur-2xl transition-all duration-300",
+          collapsed ? "w-[78px]" : "w-[270px]",
         )}
       >
-        <div className="flex items-center gap-3 px-4 h-20 border-b border-sidebar-border">
-          <div className="brand-mark flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
-            K
-          </div>
-          {!collapsed && (
-            <div className="flex flex-col leading-tight">
-              <span className="font-display text-lg font-semibold">KaduDev</span>
-              <span className="text-[10px] uppercase text-muted-foreground">Prompt Engine</span>
+        {/* Brand */}
+        <div
+          className={cn(
+            "relative flex h-[82px] shrink-0 items-center border-b border-white/[0.07]",
+            collapsed ? "justify-center px-3" : "px-5",
+          )}
+        >
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
+
+          <Link
+            to="/dashboard"
+            className={cn(
+              "group flex items-center",
+              collapsed ? "justify-center" : "gap-3",
+            )}
+          >
+            {/* K Logo */}
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] border border-orange-400/30 bg-gradient-to-br from-orange-300 via-orange-500 to-orange-700 text-lg font-black italic text-black shadow-[0_0_28px_rgba(255,100,0,0.22)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_38px_rgba(255,100,0,0.35)]">
+              <span className="relative z-10">K</span>
+              <div className="absolute inset-0 rounded-[13px] bg-white/20 opacity-0 blur-sm transition-opacity group-hover:opacity-40" />
+            </div>
+
+            {!collapsed && (
+              <div className="flex min-w-0 flex-col leading-none">
+                <span className="font-display text-[17px] font-semibold tracking-tight text-white">
+                  KaduDev
+                </span>
+                <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-orange-400/80">
+                  Studios
+                </span>
+              </div>
+            )}
+          </Link>
+        </div>
+
+        {/* Navigation */}
+        <nav className="custom-scrollbar flex-1 overflow-y-auto px-3 py-5">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className="mb-6">
+              {!collapsed && (
+                <div className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-white/25">
+                  {group.label}
+                </div>
+              )}
+
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const active =
+                    pathname === item.to ||
+                    pathname.startsWith(item.to + "/");
+
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      title={collapsed ? item.label : undefined}
+                      className={cn(
+                        "nav-item group relative flex items-center rounded-xl transition-all duration-200",
+                        collapsed
+                          ? "justify-center px-3 py-3"
+                          : "gap-3 px-3 py-2.5",
+                        active
+                          ? "bg-gradient-to-r from-orange-500/[0.16] via-orange-500/[0.08] to-transparent text-orange-300 shadow-[inset_2px_0_0_rgba(255,120,30,0.9),0_8px_30px_rgba(255,90,0,0.06)]"
+                          : "text-white/50 hover:bg-white/[0.035] hover:text-white/85",
+                      )}
+                    >
+                      {active && (
+                        <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full bg-orange-400 shadow-[0_0_10px_rgba(255,120,30,0.8)]" />
+                      )}
+
+                      <Icon
+                        className={cn(
+                          "h-[17px] w-[17px] shrink-0 transition-all duration-200",
+                          active
+                            ? "text-orange-400"
+                            : "text-white/35 group-hover:text-orange-300",
+                        )}
+                      />
+
+                      {!collapsed && (
+                        <span className="truncate text-[13px] font-medium">
+                          {item.label}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {/* Admin */}
+          {isAdmin && (
+            <div className="border-t border-white/[0.06] pt-5">
+              {!collapsed && (
+                <div className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-orange-400/45">
+                  Administração
+                </div>
+              )}
+
+              <div className="space-y-1">
+                {ADMIN_ITEMS.map((item) => {
+                  const active =
+                    pathname === item.to ||
+                    pathname.startsWith(item.to + "/");
+
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      title={collapsed ? item.label : undefined}
+                      className={cn(
+                        "group relative flex items-center rounded-xl transition-all duration-200",
+                        collapsed
+                          ? "justify-center px-3 py-3"
+                          : "gap-3 px-3 py-2.5",
+                        active
+                          ? "bg-orange-500/[0.11] text-orange-300"
+                          : "text-white/40 hover:bg-white/[0.035] hover:text-white/80",
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "h-[17px] w-[17px] shrink-0",
+                          active
+                            ? "text-orange-400"
+                            : "text-white/30 group-hover:text-orange-300",
+                        )}
+                      />
+
+                      {!collapsed && (
+                        <span className="truncate text-[13px] font-medium">
+                          {item.label}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           )}
-        </div>
-        <nav className="flex-1 px-2 py-4 space-y-1">
-          {nav.map((item) => {
-            const active = pathname === item.to || pathname.startsWith(item.to + "/");
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
-                  active
-                    ? "bg-gradient-to-r from-primary/20 to-primary/5 text-primary shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--primary)_25%,transparent)]"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground",
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span className="truncate">{item.label}</span>}
-              </Link>
-            );
-          })}
         </nav>
-        <div className="p-2 border-t border-border">
+
+        {/* Collapse */}
+        <div className="shrink-0 border-t border-white/[0.07] p-3">
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start"
+            className={cn(
+              "h-10 w-full rounded-xl border border-transparent text-white/35 transition-all hover:border-white/[0.06] hover:bg-white/[0.035] hover:text-white/80",
+              collapsed ? "justify-center px-0" : "justify-start",
+            )}
             onClick={() => setCollapsed((c) => !c)}
           >
-            <Menu className="h-4 w-4" />
-            {!collapsed && <span className="ml-2 text-xs text-muted-foreground">Recolher</span>}
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <>
+                <ChevronLeft className="h-4 w-4" />
+                <span className="ml-2 text-[11px] font-medium">
+                  Recolher menu
+                </span>
+              </>
+            )}
           </Button>
         </div>
       </aside>
 
-      {/* Mobile sidebar drawer */}
+      {/* Mobile Sidebar */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] md:hidden"
           onClick={() => setMobileOpen(false)}
         >
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+
           <div
-            className="absolute left-0 top-0 h-full w-64 bg-sidebar border-r border-border p-2"
+            className="absolute left-0 top-0 flex h-full w-[285px] flex-col border-r border-white/[0.08] bg-[#0a0705] shadow-[20px_0_80px_rgba(0,0,0,0.5)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2 px-2 h-14 border-b border-border mb-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
-                K
-              </div>
-              <span className="text-sm font-semibold">KaduDev Prompt Engine</span>
+            {/* Mobile brand */}
+            <div className="flex h-[82px] items-center justify-between border-b border-white/[0.07] px-5">
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-[13px] border border-orange-400/30 bg-gradient-to-br from-orange-300 via-orange-500 to-orange-700 text-lg font-black italic text-black shadow-[0_0_28px_rgba(255,100,0,0.22)]">
+                  K
+                </div>
+
+                <div className="flex flex-col leading-none">
+                  <span className="font-display text-[17px] font-semibold text-white">
+                    KaduDev
+                  </span>
+                  <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-orange-400/80">
+                    Studios
+                  </span>
+                </div>
+              </Link>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-xl text-white/40 hover:bg-white/[0.05] hover:text-white"
+                onClick={() => setMobileOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            {nav.map((item) => {
-              const Icon = item.icon;
-              const active = pathname === item.to;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium",
-                    active
-                      ? "bg-primary/10 text-primary"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent",
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
+
+            {/* Mobile nav */}
+            <nav className="flex-1 overflow-y-auto px-3 py-5">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.label} className="mb-6">
+                  <div className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-white/25">
+                    {group.label}
+                  </div>
+
+                  <div className="space-y-1">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+
+                      const active =
+                        pathname === item.to ||
+                        pathname.startsWith(item.to + "/");
+
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setMobileOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium transition-all",
+                            active
+                              ? "bg-orange-500/[0.12] text-orange-300 shadow-[inset_2px_0_0_rgba(255,120,30,0.8)]"
+                              : "text-white/50 hover:bg-white/[0.035] hover:text-white",
+                          )}
+                        >
+                          <Icon
+                            className={cn(
+                              "h-[17px] w-[17px]",
+                              active
+                                ? "text-orange-400"
+                                : "text-white/35",
+                            )}
+                          />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {isAdmin && (
+                <div className="border-t border-white/[0.06] pt-5">
+                  <div className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-orange-400/45">
+                    Administração
+                  </div>
+
+                  <div className="space-y-1">
+                    {ADMIN_ITEMS.map((item) => {
+                      const Icon = item.icon;
+
+                      const active =
+                        pathname === item.to ||
+                        pathname.startsWith(item.to + "/");
+
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setMobileOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium transition-all",
+                            active
+                              ? "bg-orange-500/[0.12] text-orange-300"
+                              : "text-white/45 hover:bg-white/[0.035] hover:text-white",
+                          )}
+                        >
+                          <Icon className="h-[17px] w-[17px]" />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </nav>
           </div>
         </div>
       )}
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-20 border-b border-border flex items-center gap-3 px-4 md:px-8 bg-background/75 backdrop-blur-xl sticky top-0 z-20">
+      {/* Main area */}
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-20 flex h-[76px] shrink-0 items-center gap-3 border-b border-white/[0.07] bg-[#080604]/75 px-4 backdrop-blur-2xl md:px-8">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-orange-500/10 to-transparent" />
+
+          {/* Mobile menu */}
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="h-10 w-10 shrink-0 rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/60 hover:bg-white/[0.05] hover:text-white md:hidden"
             onClick={() => setMobileOpen(true)}
+            aria-label="Abrir menu"
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
+          {/* Search */}
+          <div className="relative flex max-w-xl flex-1">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
+
             <Input
-              placeholder="Pesquisar…"
-              className="pl-9 bg-muted/50 border-border/70 rounded-full transition-all duration-300 focus-visible:bg-card"
+              placeholder="Pesquisar no KaduDev..."
+              className="h-10 w-full rounded-xl border-white/[0.07] bg-white/[0.025] pl-10 pr-12 text-[13px] text-white placeholder:text-white/25 transition-all duration-200 focus:border-orange-500/30 focus:bg-white/[0.04] focus:ring-1 focus:ring-orange-500/10"
             />
+
+            <div className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md border border-white/[0.06] bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-medium text-white/20 sm:flex">
+              <Command className="h-2.5 w-2.5" />
+              K
+            </div>
           </div>
-          <ThemeToggle />
-          <Button variant="ghost" size="icon" aria-label="Notificações">
-            <Bell className="h-5 w-5" />
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-semibold">
-                    {initials || "K"}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="font-medium">{user.name || "Utilizador"}</div>
-                <div className="text-xs text-muted-foreground font-normal truncate">
-                  {user.email}
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/settings">Configurações</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={signOut} className="text-destructive">
-                <LogOut className="h-4 w-4 mr-2" /> Terminar sessão
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+          <div className="ml-auto flex items-center gap-1.5">
+            <ThemeToggle />
+
+            {/* Notifications */}
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Notificações"
+              className="relative h-10 w-10 rounded-xl text-white/45 transition-all hover:bg-white/[0.04] hover:text-white"
+            >
+              <Bell className="h-[17px] w-[17px]" />
+
+              <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(255,120,30,0.8)]" />
+            </Button>
+
+            {/* User */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="ml-1 flex items-center gap-2 rounded-full outline-none transition-all hover:bg-white/[0.035]">
+                  <Avatar className="h-9 w-9 border border-orange-500/20">
+                    <AvatarFallback className="bg-gradient-to-br from-orange-500/20 to-orange-700/10 text-xs font-bold text-orange-300">
+                      {initials || "K"}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="hidden max-w-[130px] text-left lg:block">
+                    <div className="truncate text-[12px] font-semibold text-white/80">
+                      {user.name || "Utilizador"}
+                    </div>
+                    <div className="truncate text-[10px] text-white/30">
+                      {user.email}
+                    </div>
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="end"
+                sideOffset={10}
+                className="w-60 rounded-2xl border-white/[0.08] bg-[#100b08]/95 p-1.5 shadow-[0_20px_70px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
+              >
+                <DropdownMenuLabel className="px-3 py-3">
+                  <div className="font-semibold text-white">
+                    {user.name || "Utilizador"}
+                  </div>
+
+                  <div className="mt-1 truncate text-xs font-normal text-white/35">
+                    {user.email}
+                  </div>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator className="bg-white/[0.06]" />
+
+                <DropdownMenuItem
+                  asChild
+                  className="cursor-pointer rounded-xl text-white/60 focus:bg-white/[0.05] focus:text-white"
+                >
+                  <Link to="/settings">
+                    <SettingsIcon className="mr-2 h-4 w-4" />
+                    Configurações
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={signOut}
+                  className="cursor-pointer rounded-xl text-red-400 focus:bg-red-500/10 focus:text-red-300"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Terminar sessão
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
-        <main className="page-enter flex-1 p-4 md:p-8 lg:p-10">{children}</main>
+
+        {/* Content */}
+        <main className="page-enter min-w-0 flex-1 p-4 md:p-8 lg:p-10">
+          {children}
+        </main>
       </div>
     </div>
   );
@@ -281,12 +621,24 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+    <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 className="font-display text-3xl md:text-4xl font-medium italic">{title}</h1>
-        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-white md:text-4xl">
+          {title}
+        </h1>
+
+        {description && (
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/40">
+            {description}
+          </p>
+        )}
       </div>
-      {actions && <div className="flex gap-2">{actions}</div>}
+
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
