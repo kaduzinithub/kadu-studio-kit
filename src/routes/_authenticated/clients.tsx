@@ -17,9 +17,10 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { brl, fmtDate } from "@/lib/format";
+import { Building2, CalendarDays, DollarSign, Search, UserRound } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/clients")({
-  head: () => ({ meta: [{ title: "Clientes — KaduDev Prompt Engine" }] }),
+  head: () => ({ meta: [{ title: "Clientes — KaduDev Studios" }] }),
   component: ClientsPage,
 });
 
@@ -28,6 +29,7 @@ function ClientsPage() {
   const qc = useQueryClient();
   const [selected, setSelected] = useState<string | null>(null);
   const [openNew, setOpenNew] = useState(false);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     name: "",
     niche: "",
@@ -110,21 +112,37 @@ function ClientsPage() {
     },
   });
 
+  const filteredClients = (clients.data ?? []).filter((c) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return [c.name, c.niche, c.city, c.domain, c.status].some((value) =>
+      String(value ?? "").toLowerCase().includes(q),
+    );
+  });
+
+  const totalValue = filteredClients.reduce(
+    (sum, c) => sum + Number(c.project_value || 0),
+    0,
+  );
+  const activeCount = filteredClients.filter((c) => c.status === "ativo").length;
+
   const selectedClient = clients.data?.find((c) => c.id === selected);
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Clientes"
-        description="Contratos fechados e timeline de atividades."
+        description="Sua carteira de clientes, projetos e histórico em um só lugar."
         actions={
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button>+ Novo cliente</Button>
+              <Button className="bg-gradient-to-r from-orange-500 to-amber-500 font-semibold text-black shadow-[0_0_24px_rgba(249,115,22,0.2)] hover:brightness-110">
+                + Novo cliente
+              </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="border-orange-500/15 bg-zinc-950 shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
               <DialogHeader>
-                <DialogTitle>Novo cliente</DialogTitle>
+                <DialogTitle className="text-lg">Novo cliente</DialogTitle>
               </DialogHeader>
               <div className="grid gap-3 md:grid-cols-2">
                 {(
@@ -139,107 +157,186 @@ function ClientsPage() {
                   ] as const
                 ).map(([k, l]) => (
                   <div key={k} className="space-y-1.5">
-                    <Label>{l}</Label>
+                    <Label className="text-xs text-muted-foreground">{l}</Label>
                     <Input
                       type={k === "close_date" ? "date" : k === "project_value" ? "number" : "text"}
                       value={(form as never)[k]}
                       onChange={(e) => setForm({ ...form, [k]: e.target.value })}
+                      className="border-white/10 bg-black/25 focus:border-orange-500/40"
                     />
                   </div>
                 ))}
                 <div className="space-y-1.5 md:col-span-2">
-                  <Label>Observações</Label>
+                  <Label className="text-xs text-muted-foreground">Observações</Label>
                   <Textarea
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className="border-white/10 bg-black/25 focus:border-orange-500/40"
                   />
                 </div>
               </div>
-              <Button onClick={() => create.mutate()}>Guardar</Button>
+              <Button
+                onClick={() => create.mutate()}
+                className="bg-gradient-to-r from-orange-500 to-amber-500 font-semibold text-black"
+              >
+                Guardar cliente
+              </Button>
             </DialogContent>
           </Dialog>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-        <Card className="p-4">
-          <div className="overflow-x-auto">
+      <div className="grid gap-3 md:grid-cols-3">
+        <Card className="border-orange-500/10 bg-black/25 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl border border-orange-500/15 bg-orange-500/10 p-2.5 text-orange-300"><UserRound className="h-4 w-4" /></div>
+            <div><div className="text-xs text-muted-foreground">Clientes</div><div className="text-xl font-semibold">{filteredClients.length}</div></div>
+          </div>
+        </Card>
+        <Card className="border-orange-500/10 bg-black/25 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/10 p-2.5 text-emerald-300"><Building2 className="h-4 w-4" /></div>
+            <div><div className="text-xs text-muted-foreground">Ativos</div><div className="text-xl font-semibold">{activeCount}</div></div>
+          </div>
+        </Card>
+        <Card className="border-orange-500/10 bg-black/25 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl border border-amber-500/15 bg-amber-500/10 p-2.5 text-amber-300"><DollarSign className="h-4 w-4" /></div>
+            <div><div className="text-xs text-muted-foreground">Valor da carteira</div><div className="text-xl font-semibold">{brl.format(totalValue)}</div></div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <Card className="overflow-hidden border-orange-500/10 bg-black/25 shadow-[0_20px_70px_rgba(0,0,0,0.28)]">
+          <div className="border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.07] to-transparent p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div>
+                <div className="font-semibold">Carteira de clientes</div>
+                <div className="text-xs text-muted-foreground">Selecione um cliente para abrir o histórico.</div>
+              </div>
+              <div className="relative sm:ml-auto sm:w-64">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar cliente…"
+                  className="border-white/10 bg-black/25 pl-9 focus:border-orange-500/40"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto p-3">
             <table className="w-full text-sm">
-              <thead className="text-xs uppercase text-muted-foreground text-left">
+              <thead className="text-left text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 <tr>
-                  <th className="pb-2">Nome</th>
-                  <th className="pb-2">Nicho</th>
-                  <th className="pb-2">Cidade</th>
-                  <th className="pb-2">Valor</th>
-                  <th className="pb-2">Data</th>
-                  <th className="pb-2">Status</th>
+                  <th className="px-3 pb-3">Cliente</th>
+                  <th className="px-3 pb-3">Nicho</th>
+                  <th className="px-3 pb-3">Cidade</th>
+                  <th className="px-3 pb-3">Valor</th>
+                  <th className="px-3 pb-3">Fechamento</th>
+                  <th className="px-3 pb-3">Status</th>
                 </tr>
               </thead>
               <tbody>
-                {(clients.data ?? []).map((c) => (
+                {filteredClients.map((c) => (
                   <tr
                     key={c.id}
-                    className={`border-t border-border cursor-pointer ${selected === c.id ? "bg-muted/40" : "hover:bg-muted/20"}`}
+                    className={`cursor-pointer border-t border-white/[0.06] transition-colors ${
+                      selected === c.id
+                        ? "bg-orange-500/[0.08]"
+                        : "hover:bg-white/[0.025]"
+                    }`}
                     onClick={() => setSelected(c.id)}
                   >
-                    <td className="py-3 font-medium">{c.name}</td>
-                    <td className="py-3">{c.niche}</td>
-                    <td className="py-3">{c.city}</td>
-                    <td className="py-3">{brl.format(Number(c.project_value || 0))}</td>
-                    <td className="py-3">{fmtDate(c.close_date as string)}</td>
-                    <td className="py-3">
-                      <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs">
+                    <td className="px-3 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-bold ${
+                          selected === c.id
+                            ? "border-orange-400/30 bg-orange-500/15 text-orange-300"
+                            : "border-white/10 bg-white/[0.03] text-muted-foreground"
+                        }`}>
+                          {(c.name || "N").slice(0, 1).toUpperCase()}
+                        </div>
+                        <span className="font-medium">{c.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3.5 text-muted-foreground">{c.niche || "—"}</td>
+                    <td className="px-3 py-3.5 text-muted-foreground">{c.city || "—"}</td>
+                    <td className="px-3 py-3.5 font-medium">{brl.format(Number(c.project_value || 0))}</td>
+                    <td className="px-3 py-3.5 text-muted-foreground">{fmtDate(c.close_date as string)}</td>
+                    <td className="px-3 py-3.5">
+                      <span className="rounded-full border border-emerald-500/15 bg-emerald-500/[0.07] px-2.5 py-1 text-xs text-emerald-300">
                         {c.status}
                       </span>
                     </td>
                   </tr>
                 ))}
-                {(clients.data ?? []).length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                      Nenhum cliente ainda.
-                    </td>
-                  </tr>
+                {filteredClients.length === 0 && (
+                  <tr><td colSpan={6} className="py-12 text-center text-muted-foreground">Nenhum cliente encontrado.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </Card>
 
-        <Card className="p-4">
-          <h3 className="font-medium mb-2">Timeline</h3>
-          {selectedClient ? (
-            <>
-              <div className="text-sm text-muted-foreground mb-3">
-                {selectedClient.name} · {selectedClient.domain || "sem domínio"}
+        <Card className="overflow-hidden border-orange-500/10 bg-black/25 shadow-[0_20px_70px_rgba(0,0,0,0.28)]">
+          <div className="border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.07] to-transparent p-4">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-orange-300" />
+              <div>
+                <div className="font-semibold">Timeline</div>
+                <div className="text-xs text-muted-foreground">Histórico e anotações do cliente.</div>
               </div>
-              <div className="flex gap-2 mb-3">
-                <Input
-                  placeholder="Nova nota…"
-                  value={activity}
-                  onChange={(e) => setActivity(e.target.value)}
-                />
-                <Button onClick={() => activity && addActivity.mutate()}>+</Button>
-              </div>
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-                {(activities.data ?? []).map((a) => (
-                  <div key={a.id} className="rounded-xl border border-border p-3 text-sm">
-                    <div className="text-xs text-muted-foreground mb-1">
-                      {new Date(a.created_at as string).toLocaleString("pt-BR")}
+            </div>
+          </div>
+          <div className="p-4">
+            {selectedClient ? (
+              <>
+                <div className="mb-4 rounded-xl border border-orange-500/10 bg-orange-500/[0.04] p-3">
+                  <div className="text-sm font-medium">{selectedClient.name}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">{selectedClient.domain || "Sem domínio cadastrado"}</div>
+                </div>
+                <div className="mb-4 flex gap-2">
+                  <Input
+                    placeholder="Adicionar uma nota…"
+                    value={activity}
+                    onChange={(e) => setActivity(e.target.value)}
+                    className="border-white/10 bg-black/20 focus:border-orange-500/40"
+                  />
+                  <Button
+                    onClick={() => activity.trim() && addActivity.mutate()}
+                    className="bg-orange-500 text-black hover:bg-orange-400"
+                  >
+                    +
+                  </Button>
+                </div>
+                <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
+                  {(activities.data ?? []).map((a) => (
+                    <div key={a.id} className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-3 text-sm">
+                      <div className="mb-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                        {new Date(a.created_at as string).toLocaleString("pt-BR")}
+                      </div>
+                      <div className="text-zinc-300">{a.note}</div>
                     </div>
-                    {a.note}
+                  ))}
+                  {(activities.data ?? []).length === 0 && (
+                    <div className="py-8 text-center text-sm text-muted-foreground">Sem atividades registradas.</div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex min-h-[300px] items-center justify-center text-center">
+                <div>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-500/15 bg-orange-500/[0.06] text-orange-300">
+                    <UserRound className="h-5 w-5" />
                   </div>
-                ))}
-                {(activities.data ?? []).length === 0 && (
-                  <p className="text-sm text-muted-foreground">Sem atividades.</p>
-                )}
+                  <div className="text-sm font-medium">Selecione um cliente</div>
+                  <p className="mt-1 text-xs text-muted-foreground">A timeline aparecerá aqui.</p>
+                </div>
               </div>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Selecione um cliente para ver a timeline.
-            </p>
-          )}
+            )}
+          </div>
         </Card>
       </div>
     </div>
