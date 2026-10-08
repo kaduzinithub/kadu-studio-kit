@@ -13,7 +13,7 @@ const inputSchema = z.object({
 });
 const editSchema = z.object({
   siteId: z.string().uuid(),
-  request: z.string().trim().min(3).max(4_000),
+  request: z.string().trim().min(3).max(4_000),\n  provider: z.enum(["nvidia", "openai", "openrouter", "anthropic", "gemini", "groq"]).optional(),
 });
 
 export const generateSite = createServerFn({ method: "POST" })
@@ -74,7 +74,7 @@ export const editGeneratedSite = createServerFn({ method: "POST" })
           path,
           content,
         }));
-    const generated = await getAIProvider().editSite({
+    const generated = await getAIProvider(data.provider).editSite({
       prompt: `Modifique o site conforme este pedido, preservando o que não precisa mudar: ${data.request}`,
       currentFiles: originalFiles,
     });
