@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import logoK3D from "@/assets/logo-k-3d.png";
 
 const NAV_GROUPS = [
   { label: "Principal", items: [
@@ -60,7 +61,7 @@ const ADMIN_ITEMS = [
   { to: "/admin-precos", label: "Preços", icon: Tag },
 ] as const;
 
-const LOGO_SRC = "/src/assets/logo-k-3d.png";
+const LOGO_SRC = logoK3D;
 
 export function AppShell({ children, user }: { children: ReactNode; user: { email?: string; name?: string } }) {
   const [collapsed, setCollapsed] = useState(false);
