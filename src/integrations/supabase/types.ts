@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_charges: {
+        Row: {
+          amount: number
+          charged_at: string
+          created_at: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          charged_at?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          charged_at?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       access_plans: {
         Row: {
           expires_at: string | null
