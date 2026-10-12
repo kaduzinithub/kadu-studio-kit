@@ -56,7 +56,7 @@ function SitesPage() {
     mutationFn: async (input: { id: string; patch: Record<string, unknown> }) => {
       const { data, error } = await supabase
         .from("generated_sites")
-        .update(input.patch)
+        .update(input.patch as never)
         .eq("id", input.id)
         .eq("user_id", user.id)
         .select("id,title,created_at,share_slug,is_public,preview_html,briefing_id")
