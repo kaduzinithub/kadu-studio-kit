@@ -339,7 +339,7 @@ function PromptsPage() {
             <label className="text-xs uppercase text-muted-foreground">Modelo de IA</label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Select value={provider} onValueChange={(value) => {
-                setProvider(value);
+                setProvider(value as typeof provider);
                 const defaults: Record<string, string> = {
                   nvidia: "nvidia/nemotron-3-super-120b-a12b",
                   openai: "gpt-5.4",

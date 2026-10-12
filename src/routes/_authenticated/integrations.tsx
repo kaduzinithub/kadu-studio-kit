@@ -203,7 +203,7 @@ function IntegrationsPage() {
     if (item.id === "meta-ads") {
       try {
         if (currentlyConnected) {
-          await disconnectMetaOAuth();
+          await disconnectMetaOAuth({ data: {} });
           setConnections((current) => current.map((row) => row.provider === item.id
             ? { ...row, status: "disconnected", account_name: null, account_id: null, connected_at: null }
             : row));
