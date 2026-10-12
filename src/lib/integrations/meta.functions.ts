@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { adminRequest, PROVIDER, requiredEnv, sha256 } from "./meta.server";
+import { adminRequest, PROVIDER, requiredEnv, sha256 } from "@/server/integrations/meta.server";
 
 function base64Url(bytes: Uint8Array) {
   let binary = "";
