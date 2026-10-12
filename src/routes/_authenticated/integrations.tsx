@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle2, ChevronRight, Code2, Facebook, Globe2, Link2, MousePointerClick, Plus, Radio, Search, ShieldCheck, Sparkles, Target, TrendingUp, Webhook } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { disconnectMetaOAuth, startMetaOAuth } from "@/server/integrations/meta.functions";
+import { disconnectMetaOAuth, startMetaOAuth } from "@/lib/integrations/meta.functions";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({ meta: [{ title: "Integrações — KaduDev Studios" }] }),
