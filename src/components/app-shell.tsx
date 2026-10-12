@@ -18,6 +18,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  UserRound,
   Wallet,
   Tag,
   ChevronLeft,
@@ -67,6 +68,7 @@ const NAV_GROUPS = [
 
 const ADMIN_ITEMS = [
   { to: "/admin", label: "Acessos", icon: ShieldCheck },
+  { to: "/admin-clientes", label: "Clientes", icon: UserRound },
   { to: "/admin-vendas", label: "Vendas", icon: Wallet },
   { to: "/admin-precos", label: "Preços", icon: Tag },
 ] as const;

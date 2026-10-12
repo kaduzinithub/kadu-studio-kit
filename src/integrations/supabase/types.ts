@@ -10,10 +10,37 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
+      access_charges: {
+        Row: {
+          amount: number
+          charged_at: string
+          created_at: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          charged_at?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          charged_at?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       access_plans: {
         Row: {
           expires_at: string | null
@@ -294,6 +321,48 @@ export type Database = {
           },
         ]
       }
+      integration_connections: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          config: Json
+          connected_at: string | null
+          created_at: string
+          id: string
+          last_sync_at: string | null
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          config?: Json
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          config?: Json
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           city: string | null
@@ -494,6 +563,77 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      site_tracking: {
+        Row: {
+          created_at: string
+          custom_body_script: string | null
+          custom_head_script: string | null
+          ga4_measurement_id: string | null
+          google_tag_manager_id: string | null
+          id: string
+          meta_pixel_id: string | null
+          site_id: string | null
+          tiktok_pixel_id: string | null
+          track_form_submissions: boolean
+          track_page_views: boolean
+          track_phone_clicks: boolean
+          track_whatsapp_clicks: boolean
+          updated_at: string
+          user_id: string
+          utm_campaign_default: string | null
+          utm_medium_default: string | null
+          utm_source_default: string | null
+        }
+        Insert: {
+          created_at?: string
+          custom_body_script?: string | null
+          custom_head_script?: string | null
+          ga4_measurement_id?: string | null
+          google_tag_manager_id?: string | null
+          id?: string
+          meta_pixel_id?: string | null
+          site_id?: string | null
+          tiktok_pixel_id?: string | null
+          track_form_submissions?: boolean
+          track_page_views?: boolean
+          track_phone_clicks?: boolean
+          track_whatsapp_clicks?: boolean
+          updated_at?: string
+          user_id: string
+          utm_campaign_default?: string | null
+          utm_medium_default?: string | null
+          utm_source_default?: string | null
+        }
+        Update: {
+          created_at?: string
+          custom_body_script?: string | null
+          custom_head_script?: string | null
+          ga4_measurement_id?: string | null
+          google_tag_manager_id?: string | null
+          id?: string
+          meta_pixel_id?: string | null
+          site_id?: string | null
+          tiktok_pixel_id?: string | null
+          track_form_submissions?: boolean
+          track_page_views?: boolean
+          track_phone_clicks?: boolean
+          track_whatsapp_clicks?: boolean
+          updated_at?: string
+          user_id?: string
+          utm_campaign_default?: string | null
+          utm_medium_default?: string | null
+          utm_source_default?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_tracking_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "generated_sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
