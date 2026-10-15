@@ -63,6 +63,8 @@ function safeFileName(value: string) {
   );
 }
 
+const NVIDIA_MODELS: readonly string[] = ["nvidia/nemotron-3.5-super-vl-120b-a12b", "nvidia/nemotron-3-super-120b-a12b"];
+
 function PromptsPage() {
   const { user } = Route.useRouteContext();
   const { briefing: initialBriefingId, site: initialSiteId } = Route.useSearch();
@@ -74,7 +76,7 @@ function PromptsPage() {
   const [siteRequest, setSiteRequest] = useState("");
   const [editRequest, setEditRequest] = useState<string>("");
   const [provider, setProvider] = useState<"nvidia" | "openai" | "openrouter" | "anthropic" | "gemini" | "groq">("nvidia");
-  const [model, setModel] = useState("nvidia/nemotron-3-super-120b-a12b");
+  const [model, setModel] = useState("nvidia/nemotron-3.5-super-vl-120b-a12b");
   const [testResult, setTestResult] = useState<{ status: number; ok: boolean; message: string } | null>(null);
   const [origin, setOrigin] = useState("");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
@@ -341,7 +343,7 @@ function PromptsPage() {
               <Select value={provider} onValueChange={(value) => {
                 setProvider(value as typeof provider);
                 const defaults: Record<string, string> = {
-                  nvidia: "nvidia/nemotron-3-super-120b-a12b",
+                  nvidia: "nvidia/nemotron-3.5-super-vl-120b-a12b",
                   openai: "gpt-5.4",
                   openrouter: "openai/gpt-5.4",
                   anthropic: "claude-sonnet-4-5",
@@ -370,6 +372,12 @@ function PromptsPage() {
                       <SelectItem value="openai/gpt-oss-20b">GPT-OSS 20B · ⚡ Ultra rápido</SelectItem>
                       <SelectItem value="qwen/qwen3.8-27b">Qwen 3.8 27B · 🧠 Raciocínio + visão</SelectItem>
                       <SelectItem value="minimaxai/minimax-m2.7">MiniMax M2.7 · 🚀 Agentic (Preview)</SelectItem>
+                    </>
+                  ) : provider === "nvidia" ? (
+                    <>
+                      <SelectItem value="nvidia/nemotron-3.5-super-vl-120b-a12b">Nemotron 3.5 Super VL 120B · ⭐ Recomendado</SelectItem>
+                      <SelectItem value="nvidia/nemotron-3-super-120b-a12b">Nemotron 3 Super 120B</SelectItem>
+                      {![...NVIDIA_MODELS].includes(model) && model ? <SelectItem value={model}>{model}</SelectItem> : null}
                     </>
                   ) : (
                     <SelectItem value={model}>{model}</SelectItem>
