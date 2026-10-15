@@ -63,6 +63,8 @@ function safeFileName(value: string) {
   );
 }
 
+const NVIDIA_MODELS = ["nvidia/nemotron-3.5-super-vl-120b-a12b", "nvidia/nemotron-3-super-120b-a12b"] as const;
+
 function PromptsPage() {
   const { user } = Route.useRouteContext();
   const { briefing: initialBriefingId, site: initialSiteId } = Route.useSearch();
