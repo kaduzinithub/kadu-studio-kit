@@ -34,7 +34,7 @@ async function enforcePlanLimit(
     .maybeSingle();
   if (accessError) throw new Error(`Não foi possível verificar seu plano: ${accessError.message}`);
   const expiresAt = access?.expires_at ? new Date(String(access.expires_at)) : null;
-  if (!expiresAt || expiresAt.getTime() <= Date.now()) throw new Error("O seu acesso venceu. Fale com o administrador para renovar.");
+  if (expiresAt && expiresAt.getTime() <= Date.now()) throw new Error("O seu acesso venceu. Fale com o administrador para renovar.");
 
   const rawPlan = String((access as Record<string, unknown>).plan ?? (access as Record<string, unknown>).plan_name ?? "pro").toLowerCase();
   const plan = rawPlan.includes("agency") ? "agency" : rawPlan.includes("starter") ? "starter" : "pro";
