@@ -63,7 +63,7 @@ function safeFileName(value: string) {
   );
 }
 
-const NVIDIA_MODELS = ["nvidia/nemotron-3.5-super-vl-120b-a12b", "nvidia/nemotron-3-super-120b-a12b"] as const;
+const NVIDIA_MODELS: readonly string[] = ["nvidia/nemotron-3.5-super-vl-120b-a12b", "nvidia/nemotron-3-super-120b-a12b"];
 
 function PromptsPage() {
   const { user } = Route.useRouteContext();
