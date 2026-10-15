@@ -74,7 +74,7 @@ function PromptsPage() {
   const [siteRequest, setSiteRequest] = useState("");
   const [editRequest, setEditRequest] = useState<string>("");
   const [provider, setProvider] = useState<"nvidia" | "openai" | "openrouter" | "anthropic" | "gemini" | "groq">("nvidia");
-  const [model, setModel] = useState("nvidia/nemotron-3-super-120b-a12b");
+  const [model, setModel] = useState("nvidia/nemotron-3.5-super-vl-120b-a12b");
   const [testResult, setTestResult] = useState<{ status: number; ok: boolean; message: string } | null>(null);
   const [origin, setOrigin] = useState("");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
