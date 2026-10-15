@@ -77,8 +77,19 @@ function LeadsPage() {
       const { error } = await supabase.from("leads").update({ status }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
-    onError: (e) => toast.error((e as Error).message),
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ["leads"] });
+      const snapshots = qc.getQueriesData({ queryKey: ["leads"] });
+      qc.setQueriesData({ queryKey: ["leads"] }, (old: unknown) =>
+        Array.isArray(old) ? old.map((l) => (l.id === id ? { ...l, status } : l)) : old,
+      );
+      return { snapshots };
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onError: (e, _v, ctx) => {
+      ctx?.snapshots.forEach(([key, data]) => qc.setQueryData(key, data));
+      toast.error((e as Error).message, { id: "lead-status" });
+    },
   });
 
   const createLead = useMutation({

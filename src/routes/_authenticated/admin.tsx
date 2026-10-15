@@ -85,7 +85,7 @@ function AdminPage() {
   const mPlan = useMutation({
     mutationFn: (v: { id: string; plan: Plan }) => savePlan({ data: v }),
     onSuccess: () => {
-      toast.success("Validade atualizada");
+      toast.success("Validade atualizada", { id: "plan-updated" });
       refresh();
     },
     onError: onErr,
@@ -219,7 +219,11 @@ function AdminPage() {
               </div>
               {!u.is_admin && (
                 <div className="flex gap-2 items-center">
-                  <Select onValueChange={(v) => mPlan.mutate({ id: u.id, plan: v as Plan })}>
+                  <Select
+                    value=""
+                    disabled={mPlan.isPending}
+                    onValueChange={(v) => v && mPlan.mutate({ id: u.id, plan: v as Plan })}
+                  >
                     <SelectTrigger className="h-9 w-[150px]">
                       <SelectValue placeholder="Renovar…" />
                     </SelectTrigger>
