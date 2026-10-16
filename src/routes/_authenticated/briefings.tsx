@@ -201,9 +201,9 @@ function BriefingsPage() {
       const { error } = await supabase.from("briefings").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, id) => {
+      qc.setQueryData<Briefing[]>(["briefings"], (old) => (old ?? []).filter((b) => b.id !== id));
       setSelected(null);
-      qc.invalidateQueries({ queryKey: ["briefings"] });
     },
   });
 
@@ -213,7 +213,12 @@ function BriefingsPage() {
         title="Briefings"
         description="Transforme informações da empresa em um briefing pronto para gerar sites."
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {draft && (
+              <span className="text-xs text-muted-foreground">
+                {save.isPending ? "Salvando…" : save.isError ? "Erro ao salvar" : "Tudo salvo"}
+              </span>
+            )}
             <Button
               onClick={() => createBriefing.mutate()}
               className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-black font-semibold shadow-[0_0_24px_rgba(249,115,22,0.22)] hover:brightness-110"
