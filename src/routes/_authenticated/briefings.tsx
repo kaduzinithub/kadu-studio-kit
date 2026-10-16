@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -122,9 +122,15 @@ function BriefingsPage() {
     if (!selected && list.data && list.data.length > 0) setSelected(list.data[0].id);
   }, [list.data, selected]);
 
+  // Load the draft only when the selected briefing changes — never overwrite
+  // what the user is editing when the list refreshes in the background.
+  const lastSavedRef = useRef<string>("");
   useEffect(() => {
+    if (draft?.id === selected) return;
     const current = list.data?.find((b) => b.id === selected) ?? null;
+    lastSavedRef.current = current ? JSON.stringify(current) : "";
     setDraft(current ? { ...current } : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, list.data]);
 
   const createBriefing = useMutation({
@@ -138,7 +144,7 @@ function BriefingsPage() {
       return data as Briefing;
     },
     onSuccess: (b) => {
-      qc.invalidateQueries({ queryKey: ["briefings"] });
+      qc.setQueryData<Briefing[]>(["briefings"], (old) => [b, ...(old ?? [])]);
       setSelected(b.id);
     },
   });
@@ -164,20 +170,28 @@ function BriefingsPage() {
             .from("prompts")
             .insert({ user_id: user.id, briefing_id: id, title, content });
       if (promptError) throw promptError;
+      return b;
     },
-    onSuccess: () => {
-      toast.success("Briefing guardado e prompt atualizado");
-      qc.invalidateQueries({ queryKey: ["briefings"] });
+    onSuccess: (b) => {
+      // Update the list in place (no refetch) so the form never jumps back.
+      qc.setQueryData<Briefing[]>(["briefings"], (old) =>
+        (old ?? []).map((x) => (x.id === b.id ? { ...x, ...b } : x)),
+      );
       qc.invalidateQueries({ queryKey: ["prompts"] });
     },
-    onError: (e) => toast.error((e as Error).message),
+    onError: (e) => toast.error((e as Error).message, { id: "briefing-save" }),
   });
 
   const generatedPrompt = useMemo(() => (draft ? generatePrompt(draft) : ""), [draft]);
 
   useEffect(() => {
     if (!draft) return;
-    const t = setTimeout(() => save.mutate(draft), 800);
+    const snapshot = JSON.stringify(draft);
+    if (snapshot === lastSavedRef.current) return;
+    const t = setTimeout(() => {
+      lastSavedRef.current = snapshot;
+      save.mutate(draft);
+    }, 800);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft]);
